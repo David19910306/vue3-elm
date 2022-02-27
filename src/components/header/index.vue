@@ -33,6 +33,9 @@ export default defineComponent({
   .center{
     flex: 1;
     text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

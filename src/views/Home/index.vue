@@ -8,19 +8,19 @@
       <section class="location">
       <ul>
         <li><span>当前定位城市：</span><span>定位不准时，请在城市列表中选择</span></li>
-        <li><span>{{city.location.name}}</span><span><i class="iconfont icon-fangxiang-you"></i></span></li>
+        <li><span @click="clickHandler(city.location)">{{city.location.name}}</span><span><i class="iconfont icon-fangxiang-you"></i></span></li>
       </ul>
       </section>
       <section class="cities">
         <h4 class="title">热门城市</h4>
         <div class="city hot">
-          <span v-for="city in city.hot" :key="city.id">{{city.name}}</span>
+          <span @click="clickHandler(city)" v-for="city in city.hot" :key="city.id">{{city.name}}</span>
         </div>
       </section>
       <section class="cities" v-for="(group, index) in city.group" :key="group">
         <h4 class="title">{{`${Object.getOwnPropertyNames(group)} ${index === 0? '(按字母排序)': ''}`}}</h4>
         <div class="city">
-          <span v-for="city in group[Object.getOwnPropertyNames(group)]" :key="city.id">{{city.name}}</span>
+          <span @click="clickHandler(city)" v-for="city in group[Object.getOwnPropertyNames(group)]" :key="city.id">{{city.name}}</span>
         </div>
       </section>
     </div>
@@ -30,8 +30,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, reactive } from 'vue'
-import { getCities } from '@/api/server.home'
+import requst from '@/api'
 import Header from '@/components/header/index.vue'
+import { Router, useRouter } from 'vue-router'
+import { ICity } from '@/interface'
 
 export default defineComponent({
   name: 'Home',
@@ -42,12 +44,24 @@ export default defineComponent({
       hot: [],
       group: [{ }]
     })
+    const router:Router = useRouter()
+
+    // 路由跳转
+    const clickHandler = (selectCity:ICity):void => {
+      // console.log(selectCity, router)
+      router.push({
+        path: `/search/${selectCity.id}`,
+        query: {
+          name: selectCity.name
+        }
+      })
+    }
 
     // 组件挂载之后即可请求后台数据
     onMounted(async () => {
-      const location = await getCities({ type: 'guess' })
-      const hot = await getCities({ type: 'hot' })
-      const group = await getCities({ type: 'group' })
+      const location = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'guess' })
+      const hot = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'hot' })
+      const group = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'group' })
       // console.log(location, hot, group)
       if (location.status === 200 && hot.status === 200 && group.status === 200) {
         city.location = location.data
@@ -56,7 +70,7 @@ export default defineComponent({
       }
     })
 
-    return { city }
+    return { city, clickHandler }
   }
 })
 </script>
@@ -133,7 +147,7 @@ export default defineComponent({
           color: #666;
           font-size: .14rem;
           height: .41rem;
-          width: .93rem;
+          width: 24.85%;
           line-height: .41rem;
           overflow: hidden;
           text-overflow: ellipsis;
