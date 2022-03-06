@@ -67,6 +67,8 @@ export default defineComponent({
   }
   .content{
     flex: 1;
+    background-color: #e4e4e4;
+    overflow-y: auto;
   }
   .tabbar {
     height: .49rem;

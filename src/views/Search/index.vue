@@ -38,6 +38,7 @@ import Header from '@/components/header/index.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ILocation } from '@/interface'
 import request from '@/api'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Search',
@@ -50,11 +51,12 @@ export default defineComponent({
     const { params, query } = useRoute() // params.id
     const selectCity = query.name
     const router = useRouter()
+    const store = useStore()
 
     // 提交按钮
     const onSubmit = async (keyword: string):Promise<void> => {
       // console.log(keyWord)
-      const response = await request('https://elm.cangdu.org/v1/pois', 'get', { type: 'search', city_id: params.id, keyword })
+      const response = await request('/api/v1/pois', 'get', { type: 'search', city_id: params.id, keyword })
       if (response.status === 200) {
         data.list = response.data
       }
@@ -63,6 +65,7 @@ export default defineComponent({
 
     // 路由跳转按钮
     const jumpToMain = (location: ILocation) => {
+      store.dispatch('recordGeoHash', location.geohash)
       // console.log(location)
       router.push({
         path: '/main/msite',

@@ -12,14 +12,14 @@ module.exports = {
   },
   devServer: {
     open: true,
-    host: '0.0.0.0',
     proxy: {
-      '/v1': {
-        target: 'https://elm.cangdu.org/v1',
+      '/api': {
+        target: 'https://elm.cangdu.org/',
         ws: true,
+        secure: false,
         changeOrigin: true,
         pathRewrite: {
-          '^/v1': ''
+          '^/api': ''
         }
       }
     }

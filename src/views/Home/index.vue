@@ -59,9 +59,9 @@ export default defineComponent({
 
     // 组件挂载之后即可请求后台数据
     onMounted(async () => {
-      const location = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'guess' })
-      const hot = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'hot' })
-      const group = await requst('https://elm.cangdu.org/v1/cities', 'get', { type: 'group' })
+      const location = await requst('/api/v1/cities', 'get', { type: 'guess' })
+      const hot = await requst('/api/v1/cities', 'get', { type: 'hot' })
+      const group = await requst('/api/v1/cities', 'get', { type: 'group' })
       // console.log(location, hot, group)
       if (location.status === 200 && hot.status === 200 && group.status === 200) {
         city.location = location.data
