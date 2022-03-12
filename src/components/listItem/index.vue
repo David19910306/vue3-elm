@@ -1,5 +1,5 @@
 <template>
-  <div class="list-item">
+  <div class="list-item" @click="jumpToFoodList">
     <section class="left">
       <img  src="https://img0.baidu.com/it/u=452249793,2581016670&fm=253&fmt=auto&app=138&f=JPEG" />
     </section>
@@ -38,12 +38,19 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { Tag, Rate } from 'vant'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   components: { Tag, Rate },
   setup () {
     const shiningCount = ref(4)
-    return { shiningCount }
+    const router = useRouter()
+    const jumpToFoodList = () => {
+      router.push({
+        path: '/foodlist'
+      })
+    }
+    return { shiningCount, jumpToFoodList }
   }
 })
 </script>

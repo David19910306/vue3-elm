@@ -38,6 +38,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/index.vue')
       }
     ]
+  },
+  {
+    path: '/foodlist',
+    name: 'FoodList',
+    component: () => import(/* webpackChunkName:"Food" */ '../views/FoodList/index.vue')
+  },
+  {
+    path: '/storelist',
+    name: 'StoreList',
+    component: () => import(/* webpackChunkName: "Food" */ '../views/StoreList/index.vue')
   }
 ]
 

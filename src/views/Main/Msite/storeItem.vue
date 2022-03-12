@@ -1,5 +1,5 @@
 <template>
-  <div class="store-item">
+  <div class="store-item" @click="jumpToStoreList">
     <img src="https://img2.baidu.com/it/u=1100246879,1702373665&fm=253&fmt=auto&app=138&f=JPEG" alt="美食" />
     <h6>美食</h6>
   </div>
@@ -7,10 +7,18 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   setup () {
-    console.log('store-item')
+    const router = useRouter()
+    const jumpToStoreList = () => {
+      router.push({
+        path: '/storelist'
+      })
+    }
+
+    return { jumpToStoreList }
   }
 })
 </script>
