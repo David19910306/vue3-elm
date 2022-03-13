@@ -3,7 +3,7 @@ const path = require('path')
 function resolve (dir) {
   return path.join(__dirname, dir)
 }
-
+// 提交代码到gitee，并同步到github
 module.exports = {
   publicPath: '/',
   chainWebpack: config => {
