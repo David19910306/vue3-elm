@@ -1,35 +1,33 @@
 <template>
   <div class="list-item" @click="jumpToFoodList">
     <section class="left">
-      <img  src="https://img0.baidu.com/it/u=452249793,2581016670&fm=253&fmt=auto&app=138&f=JPEG" />
+      <img :src="`https://elm.cangdu.org/img/${list.image_path}`" />
     </section>
     <section class="center">
       <section class="top">
         <Tag color="#FADB4A" text-color="#333">品牌</Tag>
-        <span>bigbang韩国炸鸡（天天有优惠）</span>
+        <span>{{list.name}}</span>
       </section>
       <section class="middle">
-        <Rate :size="12" color="#ffd21e" void-icon="star" void-coloe="#eee" gutter="0px" v-model="shiningCount"></Rate>
-        &nbsp;<span>4.2</span>
-        &nbsp;<label>月售9199单</label>
+        <Rate :size="12" color="#ffd21e" void-icon="star" void-coloe="#eee" gutter="0px" v-model="shiningCount" readonly></Rate>
+        &nbsp;<span>{{list.rating}}</span>
+        &nbsp;<label>月售{{list.recent_order_num}}单</label>
       </section>
       <section class="bottom">
-        <span>￥20元起送 / 配送费￥5</span>
+        <span>￥{{list.float_minimum_order_amount}}元起送 / 配送费￥{{list.float_delivery_fee}}</span>
       </section>
     </section>
     <section class="right">
       <section class="tags-top">
-        <Tag color="#e4e4e4" plain text-color="#c8c8c8">票</Tag>
-        <Tag color="#e4e4e4" plain text-color="#c8c8c8">保</Tag>
-        <Tag color="#e4e4e4" plain text-color="#c8c8c8">准</Tag>
+        <Tag v-for="tag in list.supports" :key="tag.id" plain :text-color="`#${tag.icon_color}`">{{tag.icon_name}}</Tag>
       </section>
       <section class="tags-middle">
-        <Tag type="primary">蜂鸟专送</Tag>
-        <Tag type="primary" plain>准时达</Tag>
+        <Tag v-if="list.delivery_mode.is_solid" :color="`#${list.delivery_mode.color}`">蜂鸟专送</Tag>
+        <Tag type="primary" plain :color="`#${list.delivery_mode.color}`">准时达</Tag>
       </section>
       <section class="distanceTime">
-        <span class="distance">1.87km /</span>
-        <span class="time"> 59分钟</span>
+        <span class="distance">{{list.distance}}</span>
+        <span class="time">{{list.order_lead_time}}</span>
       </section>
     </section>
   </div>
@@ -41,9 +39,11 @@ import { Tag, Rate } from 'vant'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
+  name: 'ListItem',
   components: { Tag, Rate },
-  setup () {
-    const shiningCount = ref(4)
+  props: ['list'],
+  setup (props) {
+    const shiningCount = ref(props.list.rating)
     const router = useRouter()
     const jumpToFoodList = () => {
       router.push({
@@ -74,24 +74,22 @@ export default defineComponent({
   .right{
     flex: 1;
     height: .7rem;
-    display: flex;
-    flex-direction: column;
     .tags-top{
       display: flex;
       align-items: center;
-      flex: 1;
       justify-content: center;
       span{
-        margin: 0 .02rem;
+        transform: scale(.8);
       }
     }
-    .tags-middle{
-      flex: 1;
+    .tags-middle span{
+      vertical-align: middle;
     }
     .distanceTime{
       flex: 1;
       font-size: .12rem;
       display: flex;
+      flex-direction: column;
       align-items: center;
       .distance{
         color: #8E8E8E;
@@ -110,6 +108,7 @@ export default defineComponent({
       display: flex;
       height: .17rem;
       span:last-child{
+        margin-left: .05rem;
         font-size: .15rem;
         line-height: .17rem;
         color: #333;

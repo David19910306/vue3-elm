@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, reactive } from 'vue'
-import requst from '@/api'
+import httpRequest from '@/api'
 import Header from '@/components/header/index.vue'
 import { Router, useRouter } from 'vue-router'
 import { ICity } from '@/interface'
@@ -59,9 +59,9 @@ export default defineComponent({
 
     // 组件挂载之后即可请求后台数据
     onMounted(async () => {
-      const location = await requst('/api/v1/cities', 'get', { type: 'guess' })
-      const hot = await requst('/api/v1/cities', 'get', { type: 'hot' })
-      const group = await requst('/api/v1/cities', 'get', { type: 'group' })
+      const location = await httpRequest('https://elm.cangdu.org/v1/cities', 'get', { type: 'guess' })
+      const hot = await httpRequest('/api/v1/cities', 'get', { type: 'hot' })
+      const group = await httpRequest('/api/v1/cities', 'get', { type: 'group' })
       // console.log(location, hot, group)
       if (location.status === 200 && hot.status === 200 && group.status === 200) {
         city.location = location.data

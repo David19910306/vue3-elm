@@ -44,8 +44,8 @@ export default defineComponent({
   setup () {
     const active = ref(0)
     const route = useRoute()
-    const { query: { name, geohash } } = route
-    console.log(geohash, name)
+    const { query: { name } } = route
+    // console.log(geohash, name)
     return { name, active }
   }
 })

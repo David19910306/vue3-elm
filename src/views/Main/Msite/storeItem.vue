@@ -1,7 +1,7 @@
 <template>
   <div class="store-item" @click="jumpToStoreList">
-    <img src="https://img2.baidu.com/it/u=1100246879,1702373665&fm=253&fmt=auto&app=138&f=JPEG" alt="美食" />
-    <h6>美食</h6>
+    <img :src="`https://fuss10.elemecdn.com/${item.image_url}`" alt="美食" />
+    <h6>{{item.title}}</h6>
   </div>
 </template>
 
@@ -10,6 +10,7 @@ import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
+  props: ['item'],
   setup () {
     const router = useRouter()
     const jumpToStoreList = () => {

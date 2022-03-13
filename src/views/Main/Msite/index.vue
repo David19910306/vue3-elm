@@ -3,56 +3,51 @@
     <section class="swipe-container">
       <Swipe class="my-swipe">
         <SwipeItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
+          <StoreItem v-for="item in state.foodlist.slice(0, 8)" :key="item.id" :item="item"></StoreItem>
         </SwipeItem>
         <SwipeItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
-          <StoreItem></StoreItem>
+          <StoreItem v-for="item in state.foodlist.slice(8)" :key="item.id" :item="item"></StoreItem>
         </SwipeItem>
       </Swipe>
     </section>
     <div class="list-container">
       <header><i class="iconfont icon-shangjia"></i><span>附近商家</span></header>
       <section>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
-        <ListItem></ListItem>
+        <ListItem v-for="listItem in state.shoplist" :key="listItem.id" :list="listItem"></ListItem>
       </section>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, reactive } from 'vue'
 import { Swipe, SwipeItem } from 'vant'
 import StoreItem from './storeItem.vue'
 import ListItem from '@/components/listItem/index.vue'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Msite',
   components: { Swipe, SwipeItem, StoreItem, ListItem },
   setup () {
-    console.log('@')
+    const state = reactive({
+      foodlist: [],
+      shoplist: []
+    })
+    const store = useStore()
+    // 组件挂载完毕，请求后台数据
+    onMounted(async () => {
+      const [latitude, longitude] = store.getters.getGeoHash.split(',')
+      const food = await httpRequest('/api/v2/index_entry', 'get', { geohash: store.getters.getGeoHash })
+      const shop = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0 })
+      if (food.status === 200 && shop.status === 200) {
+        state.foodlist = food.data
+        state.shoplist = shop.data
+      }
+    })
+
+    return { state }
   }
 })
 </script>
