@@ -8,14 +8,21 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   props: ['item'],
-  setup () {
+  setup (props) {
     const router = useRouter()
+    const store = useStore()
     const jumpToStoreList = () => {
       router.push({
-        path: '/storelist'
+        path: '/storelist',
+        query: {
+          geohash: store.getters.getGeoHash,
+          title: props.item.title,
+          restaurant_category_id: props.item.id
+        }
       })
     }
 

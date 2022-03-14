@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, reactive } from 'vue'
 import { Swipe, SwipeItem } from 'vant'
-import StoreItem from './storeItem.vue'
+import StoreItem from '@/components/storeItem/storeItem.vue'
 import ListItem from '@/components/listItem/index.vue'
 import httpRequest from '@/api'
 import { useStore } from 'vuex'
@@ -36,9 +36,9 @@ export default defineComponent({
       shoplist: []
     })
     const store = useStore()
+    const [latitude, longitude] = store.getters.getGeoHash.split(',')
     // 组件挂载完毕，请求后台数据
     onMounted(async () => {
-      const [latitude, longitude] = store.getters.getGeoHash.split(',')
       const food = await httpRequest('/api/v2/index_entry', 'get', { geohash: store.getters.getGeoHash })
       const shop = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0 })
       if (food.status === 200 && shop.status === 200) {
@@ -46,7 +46,7 @@ export default defineComponent({
         state.shoplist = shop.data
       }
     })
-
+    console.log(state.foodlist)
     return { state }
   }
 })

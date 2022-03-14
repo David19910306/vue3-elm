@@ -147,7 +147,7 @@ export default defineComponent({
           color: #666;
           font-size: .14rem;
           height: .41rem;
-          width: 24.85%;
+          width: 24.75%;
           line-height: .41rem;
           overflow: hidden;
           text-overflow: ellipsis;

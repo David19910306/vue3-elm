@@ -3,7 +3,7 @@ const path = require('path')
 function resolve (dir) {
   return path.join(__dirname, dir)
 }
-// 我是今天同步测试
+
 module.exports = {
   publicPath: '/',
   chainWebpack: config => {
