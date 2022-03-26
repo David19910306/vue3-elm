@@ -1,8 +1,9 @@
 <template>
   <span @click="selectCheckedGroupHandler(unique)">
-    <i class="iconfont icon-duigou" style="color: #3E90E8;font-weight: bolder;"  v-if="selectChecked === unique"></i>
+    <i class="iconfont icon-duigou" style="color: #3E90E8;font-weight: bolder;"
+        v-if="selectArray.find(tag => tag === selectChecked) && selectChecked === unique"></i>
     <i :class="`iconfont ${iconfontClass}`" :style="{color:color}" v-else></i>
-    <label :class="{activeLabel: selectChecked === unique}">{{label}}</label>
+    <label :class="{activeLabel: selectArray.find(tag => tag === selectChecked) && selectChecked === unique }">{{label}}</label>
   </span>
 </template>
 
@@ -12,8 +13,9 @@ import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'ClickSpan',
-  props: ['unique', 'label', 'iconfontClass', 'color'],
+  props: ['unique', 'label', 'iconfontClass', 'color', 'selectArray'],
   setup (props, context) {
+    // console.log(props)
     const selectChecked = ref('')
     const selectCheckedGroupCount = ref(0)
     const selectCheckedGroupHandler = (unique:string) => {

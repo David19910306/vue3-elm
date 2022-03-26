@@ -17,8 +17,8 @@ interface IParams{
   limit?: number,
   restaurant_category_id?: number,
   order_by?: number,
-  delivery_mode?: [],
-  support_ids?: [],
+  delivery_mode?: number[],
+  support_ids?: number[],
   restaurant_category_ids?: [number],
   extras?: []
 }

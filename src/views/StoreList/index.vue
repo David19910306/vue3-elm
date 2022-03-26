@@ -48,26 +48,21 @@
             </ul>
           </section>
         </DropdownItem>
-        <DropdownItem title="筛选">
+        <DropdownItem title="筛选" ref="dropDownItemFilter">
           <section class="filter">
             <section class="send">
               <header>配送方式</header>
-              <ClickSpan unique="single" label="蜂鸟转送" iconfontClass="icon-fengniaopaotui" color="#0089CF" @getGroupSelect="getGroupSelect"></ClickSpan>
+              <ClickSpan :selectArray="finalSelectChecked" unique="single" label="蜂鸟转送" iconfontClass="icon-fengniaopaotui" color="#0089CF" @getGroupSelect="getGroupSelect"></ClickSpan>
             </section>
             <section class="options">
               <header>商家属性（可以多选）</header>
               <section class="body">
-                <ClickSpan unique="brand" label="品牌商家" iconfontClass="icon-pin2" color="#3FBDE6" @getGroupSelect="getGroupSelect"></ClickSpan>
-                <ClickSpan unique="food" label="外卖保" iconfontClass="icon-servicebaoshuicang" color="#999" @getGroupSelect="getGroupSelect"></ClickSpan>
-                <ClickSpan unique="ontime" label="准时达" iconfontClass="icon-zhunshida" color="#57A9FF" @getGroupSelect="getGroupSelect"></ClickSpan>
-                <ClickSpan unique="new" label="新店" iconfontClass="icon-xin" color="#E8842D" @getGroupSelect="getGroupSelect"></ClickSpan>
-                <ClickSpan unique="online" label="在线支付" iconfontClass="icon-zhifuzhongxin" color="#FF4E00" @getGroupSelect="getGroupSelect"></ClickSpan>
-                <ClickSpan unique="check" label="开发票" iconfontClass="icon-tianmaohuopiaotongxing" color="#999" @getGroupSelect="getGroupSelect"></ClickSpan>
+                <ClickSpan :selectArray="finalSelectChecked" v-for="(span, index) in clickSpans" :key="index" :iconfontClass="span.iconfontClass" :unique="span.unique" :label="span.label" :color="span.color" @getGroupSelect="getGroupSelect"/>
               </section>
             </section>
             <section class="footer">
-              <Button color="#333" plain type="primary" style="width: 45%; border: none;font-size:.18rem;border-radius:.05rem;">清空</Button>
-              <Button color="#56d176" type="primary" style="width: 45%;font-size:.18rem;border-radius:.05rem;">
+              <Button color="#333" plain type="primary" style="width: 45%; border: none;font-size:.18rem;border-radius:.05rem;" @click="cancelClickHandler">清空</Button>
+              <Button color="#56d176" type="primary" style="width: 45%;font-size:.18rem;border-radius:.05rem;" @click="okClickHandler">
                 {{finalSelectChecked.length > 0? `确定 (${finalSelectChecked.length})`: `确定`}}
               </Button>
             </section>
@@ -96,6 +91,7 @@ export default defineComponent({
   setup () {
     const dropDownItemType = ref<any>(null)
     const dropDownItemSort = ref<any>(null)
+    const dropDownItemFilter = ref<any>(null)
     const optionsSort = [
       { value: 'icon-paixu', text: '智能排序', color: '#3B87C8', order: 0 },
       { value: 'icon-position-o', text: '距离最近', color: '#2A9BD3', order: 5 },
@@ -103,6 +99,14 @@ export default defineComponent({
       { value: 'icon-jiage', text: '起送价最低', color: '#E6B61A', order: 1 },
       { value: 'icon-shijian-xianxing', text: '配送速度最快', color: '#37C7B7', order: 2 },
       { value: 'icon-pingfen1', text: '评分最高', color: '#EBA53B', order: 3 }
+    ]
+    const clickSpans = [
+      { unique: 'brand', label: '品牌商家', iconfontClass: 'icon-pin2', color: '#3FBDE6' },
+      { unique: 'food', label: '外卖保', iconfontClass: 'icon-servicebaoshuicang', color: '#999' },
+      { unique: 'ontime', label: '准时达', iconfontClass: 'icon-zhunshida', color: '#57A9FF' },
+      { unique: 'new', label: '新店', iconfontClass: 'icon-xin', color: '#E8842D' },
+      { unique: 'online', label: '在线支付', iconfontClass: 'icon-zhifuzhongxin', color: '#FF4E00' },
+      { unique: 'check', label: '开发票', iconfontClass: 'icon-tianmaohuopiaotongxing', color: '#999' }
     ]
     // 配置下拉框的样式
     const themeVar = {
@@ -169,6 +173,38 @@ export default defineComponent({
       dropDownItemSort.value && dropDownItemSort.value.toggle()
     }
 
+    // 确定按钮点击事件
+    const okClickHandler = async () => {
+      // console.log('ok')
+      console.log(finalSelectChecked.value)
+      // eslint-disable-next-line camelcase
+      const delivery_mode = finalSelectChecked.value.find(check => check === 'single') ? [1] : []
+      // eslint-disable-next-line camelcase
+      const support_ids = finalSelectChecked.value.reduce((acc:any, curr) => {
+        return curr === 'brand' ? [8, ...acc] : curr === 'food' ? [7, ...acc] : curr === 'ontime' ? [9, ...acc]
+          : curr === 'new' ? [5, ...acc] : curr === 'online' ? [3, ...acc] : curr === 'check' ? [4, ...acc] : [...acc]
+      }, [])
+      // console.log(support_ids)
+      const result = await httpRequest('/api/shopping/restaurants', 'get', {
+        latitude,
+        longitude,
+        offset: 0,
+        limit: 20,
+        // eslint-disable-next-line camelcase
+        delivery_mode: delivery_mode.length > 0 ? [...delivery_mode] : [],
+        // eslint-disable-next-line camelcase
+        support_ids: support_ids.length > 0 ? [...support_ids] : []
+      })
+      state.shop = result.data
+      dropDownItemFilter.value && dropDownItemFilter.value.toggle()
+    }
+
+    // 取消按钮事件
+    const cancelClickHandler = () => {
+      finalSelectChecked.value = []
+      dropDownItemFilter.value && dropDownItemFilter.value.toggle()
+    }
+
     return {
       themeVar,
       ...toRefs(state),
@@ -181,7 +217,11 @@ export default defineComponent({
       dropDownItemType,
       dropDownItemSort,
       optionsSort,
-      clickItemHangler
+      clickSpans,
+      clickItemHangler,
+      dropDownItemFilter,
+      okClickHandler,
+      cancelClickHandler
     }
   }
 })
