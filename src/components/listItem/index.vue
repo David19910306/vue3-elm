@@ -22,8 +22,8 @@
         <Tag v-for="tag in list.supports" :key="tag.id" plain :text-color="`#${tag.icon_color}`">{{tag.icon_name}}</Tag>
       </section>
       <section class="tags-middle">
-        <Tag v-if="list.delivery_mode.is_solid" :color="`#${list.delivery_mode.color}`">蜂鸟专送</Tag>
-        <Tag type="primary" plain :color="`#${list.delivery_mode.color}`">准时达</Tag>
+        <Tag v-if="list.delivery_mode && list.delivery_mode.is_solid" :color="`#${list.delivery_mode.color}`">蜂鸟专送</Tag>
+        <Tag type="primary" plain :color="`#${list.delivery_mode? list.delivery_mode.color:'57a9ff'}`">准时达</Tag>
       </section>
       <section class="distanceTime">
         <span class="distance">{{list.distance}}</span>
@@ -74,23 +74,31 @@ export default defineComponent({
   .right{
     flex: 1;
     height: .7rem;
+    display: flex;
+    flex-direction: column;
     .tags-top{
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
+      flex: 1;
       span{
         transform: scale(.8);
       }
     }
-    .tags-middle span{
-      vertical-align: middle;
+    .tags-middle{
+      display: flex;
+      justify-content: flex-end;
+      span{
+        vertical-align: middle;
+      }
     }
     .distanceTime{
       flex: 1;
       font-size: .12rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-end;
+      justify-content: flex-end;
       .distance{
         color: #8E8E8E;
       }

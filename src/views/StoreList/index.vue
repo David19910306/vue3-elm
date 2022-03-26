@@ -7,11 +7,11 @@
     </Header>
     <ConfigProvider :theme-vars="themeVar">
       <DropdownMenu>
-        <DropdownItem :title="`${title}`">
+        <DropdownItem :title="`${title}`" ref="dropDownItemType">
           <section class="type">
             <section class="foodType">
               <ul>
-                <li v-for="specs in state.category" :key="specs.id" @click="clickItem(specs)" :class="{activeCurrent: state.clickItemId === specs.id}">
+                <li v-for="specs in category" :key="specs.id" @click="clickItem(specs)" :class="{activeCurrent: clickItemId === specs.id}">
                   <span class="specs">
                     <img :src="`${specs.image_url === ''? 'https://elm.cangdu.org/img/default.jpg': `https://fuss10.elemecdn.com/${specs.image_url.substring(0,1)}/${specs.image_url.substring(1,3)}/${specs.image_url.substring(3)}.${specs.image_url.includes('png')? 'png': 'jpeg'}`}`" alt="icon"/>
                     <label>{{specs.name}}</label>
@@ -25,7 +25,7 @@
             </section>
             <section class="foodName">
               <ul>
-                <li v-for="sub_specs in state.sub_categories" :key="sub_specs.id" @click="clickSubSpecs(sub_specs.id)" :class="{active: state.subItemId === sub_specs.id}">
+                <li v-for="sub_specs in sub_categories" :key="sub_specs.id" @click="clickSubSpecs(sub_specs.id)" :class="{active: subItemId === sub_specs.id}">
                   <template v-if="sub_specs.count > 0">
                     <span>{{sub_specs.name}}</span>
                     <span>{{sub_specs.count}}</span>
@@ -35,32 +35,15 @@
             </section>
           </section>
         </DropdownItem>
-        <DropdownItem title="排序">
+        <DropdownItem title="排序" ref="dropDownItemSort">
           <section class="sort">
             <ul>
-              <li>
-                <span class="iconfont icon-paixu" style="font-size: .18rem;color: #3B87C8"></span>
-                <p><span>智能排序</span></p>
-              </li>
-              <li>
-                <span class="iconfont icon-position-o" style="font-size: .18rem;color: #2A9BD3"></span>
-                <p><span>距离最近</span></p>
-              </li>
-              <li>
-                <span class="iconfont icon-redu" style="font-size: .18rem;color: #F09B9B"></span>
-                <p><span>销量最高</span></p>
-              </li>
-              <li>
-                <span class="iconfont icon-jiage" style="font-size: .18rem;color: #E6B61A"></span>
-                <p><span>起送价最低</span></p>
-              </li>
-              <li>
-                <span class="iconfont icon-shijian-xianxing" style="font-size: .18rem;color: #37C7B7"></span>
-                <p><span>配送速度最快</span></p>
-              </li>
-              <li>
-                <span class="iconfont icon-pingfen1" style="font-size: .18rem;color: #EBA53B"></span>
-                <p><span>评分最高</span></p>
+              <li v-for="(option, index) in optionsSort" :key="index" @click="clickItemHangler(option.order)">
+                <span :class="`iconfont ${option.value}`" :style="{fontSize: '.18rem',color: option.color}"></span>
+                <p>
+                  <span>{{option.text}}</span>
+                  <Icon name="success" color="#1989fa" size="20" :style="{position: 'absolute', right: '.2rem', lineHeight: '.55rem', display: currentOrder === option.order? '': 'none'}"/>
+                </p>
               </li>
             </ul>
           </section>
@@ -93,14 +76,14 @@
       </DropdownMenu>
     </ConfigProvider>
     <section class="storelist">
-      <ListItem v-for="listItem in state.shop" :key="listItem.id" :list="listItem"></ListItem>
+      <ListItem v-for="listItem in shop" :key="listItem.id" :list="listItem"></ListItem>
     </section>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref } from 'vue'
-import { DropdownMenu, DropdownItem, ConfigProvider, Tag, Button } from 'vant'
+import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
+import { DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
 import httpRequest from '@/api'
 import { useStore } from 'vuex'
@@ -109,8 +92,18 @@ import { useRoute } from 'vue-router'
 import ListItem from '@/components/listItem/index.vue'
 
 export default defineComponent({
-  components: { ClickSpan, Header, DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, ListItem },
+  components: { ClickSpan, Header, DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, ListItem, Icon },
   setup () {
+    const dropDownItemType = ref<any>(null)
+    const dropDownItemSort = ref<any>(null)
+    const optionsSort = [
+      { value: 'icon-paixu', text: '智能排序', color: '#3B87C8', order: 0 },
+      { value: 'icon-position-o', text: '距离最近', color: '#2A9BD3', order: 5 },
+      { value: 'icon-redu', text: '销量最高', color: '#F09B9B', order: 6 },
+      { value: 'icon-jiage', text: '起送价最低', color: '#E6B61A', order: 1 },
+      { value: 'icon-shijian-xianxing', text: '配送速度最快', color: '#37C7B7', order: 2 },
+      { value: 'icon-pingfen1', text: '评分最高', color: '#EBA53B', order: 3 }
+    ]
     // 配置下拉框的样式
     const themeVar = {
       dropdownMenuHeight: '.4rem',
@@ -120,10 +113,12 @@ export default defineComponent({
     }
     const state = reactive({
       category: [],
-      sub_categories: [],
+      sub_categories: [] as any[],
       clickItemId: 0,
       subItemId: 0,
-      shop: []
+      shop: [],
+      title: '', // 显示的标题
+      currentOrder: 0 // 排序界面当前的order
     })
     const myFinal: string [] = []
     const finalSelectChecked = ref(myFinal) // 最终选择的选项
@@ -131,6 +126,7 @@ export default defineComponent({
     const route = useRoute() // 接收路由传过来的参数
     // eslint-disable-next-line camelcase
     const { geohash, restaurant_category_id, title } = route.query
+    state.title = title as string
     const [latitude, longitude] = store.getters.getGeoHash.split(',')
     onMounted(async () => {
       const category = await httpRequest('/api/shopping/v2/restaurant/category', 'get', { latitude, longitude })
@@ -146,15 +142,47 @@ export default defineComponent({
       state.clickItemId = specs.id
       state.sub_categories = specs.sub_categories
     }
-    const clickSubSpecs = (id: number) => {
+    const clickSubSpecs = async (id: number) => {
       state.subItemId = id
+      // 请求后台数据
+      try {
+        const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, restaurant_category_ids: [id] })
+        state.shop = result.data
+      } catch (e) {
+        console.log(e)
+      }
+
+      state.title = state.sub_categories.find(sub => sub.id === id).name
+      dropDownItemType.value && dropDownItemType.value.toggle()
     }
     // 从子组件传过来的事件
     const getGroupSelect = (unique:string) => {
       !unique.includes('delete') ? finalSelectChecked.value.push(unique) : finalSelectChecked.value = finalSelectChecked.value.filter(select => select !== unique.split(',')[0])
     }
 
-    return { themeVar, state, clickItem, clickSubSpecs, getGroupSelect, finalSelectChecked, geohash, restaurant_category_id, title }
+    // 排序界面点击事件
+    const clickItemHangler = async (order: number) => {
+      state.currentOrder = order
+
+      const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, order_by: order })
+      state.shop = result.data
+      dropDownItemSort.value && dropDownItemSort.value.toggle()
+    }
+
+    return {
+      themeVar,
+      ...toRefs(state),
+      clickItem,
+      clickSubSpecs,
+      getGroupSelect,
+      finalSelectChecked,
+      geohash,
+      restaurant_category_id,
+      dropDownItemType,
+      dropDownItemSort,
+      optionsSort,
+      clickItemHangler
+    }
   }
 })
 </script>

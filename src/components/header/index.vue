@@ -1,16 +1,30 @@
 <template>
   <div class="header">
-    <div class="left"><slot name="left"></slot></div>
+    <div class="left" @click="clickHandler"><slot name="left"></slot></div>
     <div class="center"><slot name="center"></slot></div>
-    <div class="right"><slot name="right"></slot></div>
+    <div class="right" @click="clickHandler"><slot name="right"></slot></div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'Header'
+  name: 'Header',
+  props: ['iconName'],
+  setup () {
+    const router = useRouter()
+    // 两侧图标点击
+    const clickHandler = (event:any) => {
+      const { target } = event
+      // console.log(event)
+      target.className.includes('searchIcon') ? router.push({ path: '/main/search' }) : target.className.includes('leftIcon') ? router.go(-1)
+        : target.innerHTML === '登录|注册' ? router.push({ path: '/login' }) : console.log()
+    }
+
+    return { clickHandler }
+  }
 })
 </script>
 

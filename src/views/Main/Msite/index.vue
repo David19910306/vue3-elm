@@ -3,24 +3,24 @@
     <section class="swipe-container">
       <Swipe class="my-swipe">
         <SwipeItem>
-          <StoreItem v-for="item in state.foodlist.slice(0, 8)" :key="item.id" :item="item"></StoreItem>
+          <StoreItem v-for="item in foodlist.slice(0, 8)" :key="item.id" :item="item"></StoreItem>
         </SwipeItem>
         <SwipeItem>
-          <StoreItem v-for="item in state.foodlist.slice(8)" :key="item.id" :item="item"></StoreItem>
+          <StoreItem v-for="item in foodlist.slice(8)" :key="item.id" :item="item"></StoreItem>
         </SwipeItem>
       </Swipe>
     </section>
     <div class="list-container">
       <header><i class="iconfont icon-shangjia"></i><span>附近商家</span></header>
       <section>
-        <ListItem v-for="listItem in state.shoplist" :key="listItem.id" :list="listItem"></ListItem>
+        <ListItem v-for="listItem in shoplist" :key="listItem.id" :list="listItem"></ListItem>
       </section>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from 'vue'
+import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { Swipe, SwipeItem } from 'vant'
 import StoreItem from '@/components/storeItem/storeItem.vue'
 import ListItem from '@/components/listItem/index.vue'
@@ -46,8 +46,8 @@ export default defineComponent({
         state.shoplist = shop.data
       }
     })
-    console.log(state.foodlist)
-    return { state }
+
+    return { ...toRefs(state) }
   }
 })
 </script>

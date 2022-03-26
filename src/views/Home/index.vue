@@ -50,10 +50,7 @@ export default defineComponent({
     const clickHandler = (selectCity:ICity):void => {
       // console.log(selectCity, router)
       router.push({
-        path: `/search/${selectCity.id}`,
-        query: {
-          name: selectCity.name
-        }
+        path: `/search/${selectCity.id}`
       })
     }
 
@@ -147,7 +144,7 @@ export default defineComponent({
           color: #666;
           font-size: .14rem;
           height: .41rem;
-          width: 24.75%;
+          width: 24.85%;
           line-height: .41rem;
           overflow: hidden;
           text-overflow: ellipsis;

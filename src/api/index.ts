@@ -19,7 +19,8 @@ interface IParams{
   order_by?: number,
   delivery_mode?: [],
   support_ids?: [],
-  restaurant_category_ids?: []
+  restaurant_category_ids?: [number],
+  extras?: []
 }
 
 export default function httpRequest (url: string, method: 'get' | 'post', params?:IParams): AxiosPromise {

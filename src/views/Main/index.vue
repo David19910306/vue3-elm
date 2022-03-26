@@ -2,7 +2,7 @@
   <div class="main">
     <Header>
       <template v-slot:left><span><i class="iconfont icon-sousuo searchIcon"></i></span></template>
-      <template v-slot:center><span class="city-name">{{name}}</span></template>
+      <template v-slot:center><span class="city-name">{{location.name}}</span></template>
       <template v-slot:right><span>登录|注册</span></template>
     </Header>
     <section class="content">
@@ -11,7 +11,7 @@
     </section>
     <section class="tabbar">
       <Tabbar v-model="active" route>
-        <TabbarItem to="/main/msite">
+        <TabbarItem :to="{path: '/main/msite', query: {geohash}}">
           <span>外卖</span>
           <template v-slot:icon><Icon class="iconfont icon-elemo1"></Icon></template>
         </TabbarItem>
@@ -33,20 +33,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
 import { Tabbar, TabbarItem, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
+import { useStore } from 'vuex'
+import httpRequest from '@/api'
 
 export default defineComponent({
   name: 'Main',
   components: { Header, Tabbar, TabbarItem, Icon },
   setup () {
     const active = ref(0)
-    const route = useRoute()
-    const { query: { name } } = route
-    // console.log(geohash, name)
-    return { name, active }
+    const data = reactive({
+      location: {}, // 当前的位置信息
+      geohash: '' // 当前经纬度信息
+    })
+    const { getters } = useStore()
+    data.geohash = getters.getGeoHash
+    // 组件挂载请求后台
+    onMounted(async () => {
+      const response = await httpRequest(`/api/v2/pois/${getters.getGeoHash}`, 'get')
+      data.location = response.data
+    })
+    return { active, ...toRefs(data) }
   }
 })
 </script>
