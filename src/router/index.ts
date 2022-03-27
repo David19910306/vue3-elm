@@ -40,9 +40,9 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   {
-    path: '/foodlist',
-    name: 'FoodList',
-    component: () => import(/* webpackChunkName:"Food" */ '../views/FoodList/index.vue')
+    path: '/shop',
+    name: 'Shop',
+    component: () => import(/* webpackChunkName:"Food" */ '../views/Shop/index.vue')
   },
   {
     path: '/storelist',

@@ -47,7 +47,7 @@ export default defineComponent({
     const router = useRouter()
     const jumpToFoodList = () => {
       router.push({
-        path: '/foodlist'
+        path: '/shop'
       })
     }
     return { shiningCount, jumpToFoodList }
