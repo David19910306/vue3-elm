@@ -1,3 +1,5 @@
+import { Ref } from 'vue'
+
 export interface ICity {
   abbr: string,
   'area_code': string,
@@ -16,4 +18,10 @@ export interface ILocation {
   latitude: number,
   longitude: number,
   name: string
+}
+
+export interface IResult{
+  category?: never[],
+  shop?: never[],
+  requestResult: Record<string, never[]>
 }

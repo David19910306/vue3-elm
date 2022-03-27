@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
+import { defineComponent, onMounted, reactive, ref, toRefs, Ref } from 'vue'
 import { DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
 import httpRequest from '@/api'
@@ -85,6 +85,8 @@ import { useStore } from 'vuex'
 import ClickSpan from '@/components/clickSpan/index.vue'
 import { useRoute } from 'vue-router'
 import ListItem from '@/components/listItem/index.vue'
+import useRequest from '@/hook/storelist'
+// import { IResult } from '@/interface'
 
 export default defineComponent({
   components: { ClickSpan, Header, DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, ListItem, Icon },
@@ -124,6 +126,7 @@ export default defineComponent({
       title: '', // 显示的标题
       currentOrder: 0 // 排序界面当前的order
     })
+
     const myFinal: string [] = []
     const finalSelectChecked = ref(myFinal) // 最终选择的选项
     const store = useStore()
@@ -133,12 +136,13 @@ export default defineComponent({
     state.title = title as string
     const [latitude, longitude] = store.getters.getGeoHash.split(',')
     onMounted(async () => {
-      const category = await httpRequest('/api/shopping/v2/restaurant/category', 'get', { latitude, longitude })
-      const shop = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0 })
-      if (category.status === 200 && shop.status === 200) {
-        state.category = category.data
-        state.shop = shop.data
-      }
+      const { requestResult } = await useRequest(latitude, longitude).onMountedRequest()
+      // const category = await httpRequest('/api/shopping/v2/restaurant/category', 'get', { latitude, longitude })
+      // const shop = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0 })
+      // if (category.status === 200 && shop.status === 200) {
+      state.category = requestResult.category
+      state.shop = requestResult.shop
+      // }
     })
     // category点击事件
     // eslint-disable-next-line camelcase
@@ -150,8 +154,9 @@ export default defineComponent({
       state.subItemId = id
       // 请求后台数据
       try {
-        const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, restaurant_category_ids: [id] })
-        state.shop = result.data
+        // const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, restaurant_category_ids: [id] })
+        const { requestResult } = await useRequest(latitude, longitude).filterBySpecs(id)
+        state.shop = requestResult.shop
       } catch (e) {
         console.log(e)
       }
@@ -168,8 +173,10 @@ export default defineComponent({
     const clickItemHangler = async (order: number) => {
       state.currentOrder = order
 
-      const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, order_by: order })
-      state.shop = result.data
+      // const result = await httpRequest('/api/shopping/restaurants', 'get', { latitude, longitude, offset: 0, limit: 20, order_by: order })
+      // state.shop = result.data
+      const { requestResult } = await useRequest(latitude, longitude).filterBySorts(order)
+      state.shop = requestResult.shop
       dropDownItemSort.value && dropDownItemSort.value.toggle()
     }
 
@@ -185,17 +192,9 @@ export default defineComponent({
           : curr === 'new' ? [5, ...acc] : curr === 'online' ? [3, ...acc] : curr === 'check' ? [4, ...acc] : [...acc]
       }, [])
       // console.log(support_ids)
-      const result = await httpRequest('/api/shopping/restaurants', 'get', {
-        latitude,
-        longitude,
-        offset: 0,
-        limit: 20,
-        // eslint-disable-next-line camelcase
-        delivery_mode: delivery_mode.length > 0 ? [...delivery_mode] : [],
-        // eslint-disable-next-line camelcase
-        support_ids: support_ids.length > 0 ? [...support_ids] : []
-      })
-      state.shop = result.data
+      // eslint-disable-next-line camelcase
+      const { requestResult } = await useRequest(latitude, longitude).filterByCondition(delivery_mode as [], support_ids)
+      state.shop = requestResult.shop
       dropDownItemFilter.value && dropDownItemFilter.value.toggle()
     }
 
@@ -208,6 +207,8 @@ export default defineComponent({
     return {
       themeVar,
       ...toRefs(state),
+      // shop,
+      // category,
       clickItem,
       clickSubSpecs,
       getGroupSelect,
