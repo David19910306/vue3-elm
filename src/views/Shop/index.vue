@@ -29,8 +29,43 @@
     </header>
     <section class="shop-detail-message">
       <ConfigProvider :theme-vars="themeVars">
-        <Tabs v-model:active="currentTab" border>
-          <Tab title="商品">商品</Tab>
+        <Tabs v-model:active="currentTab" border type="line">
+          <Tab title="商品">
+            <section class="good-tag-lists">
+              <section class="good-list-content">
+                <Sidebar v-model="currentBar">
+                  <sidebar-item title="标签1"></sidebar-item>
+                  <sidebar-item title="标签2"></sidebar-item>
+                  <sidebar-item title="标签3"></sidebar-item>
+                  <sidebar-item title="标签4"></sidebar-item>
+                  <sidebar-item title="标签5"></sidebar-item>
+                  <sidebar-item title="标签6"></sidebar-item>
+                  <sidebar-item title="标签7"></sidebar-item>
+                  <sidebar-item title="标签8"></sidebar-item>
+                  <sidebar-item title="标签9"></sidebar-item>
+                </Sidebar>
+                <section class="good-lists">
+                  <ul>
+                    <li>
+                      <header class="menu-detail-header">
+                        <section class="menu-title">
+                          <strong>无内鬼</strong>
+                          <span>与枚举</span>
+                        </section>
+                        <Icon name="ellipsis" size="15" color="#969696"/>
+                      </header>
+                      <menu-detail-list></menu-detail-list>
+                      <menu-detail-list></menu-detail-list>
+                      <menu-detail-list></menu-detail-list>
+                      <menu-detail-list></menu-detail-list>
+                      <menu-detail-list></menu-detail-list>
+                    </li>
+                  </ul>
+                </section>
+              </section>
+              <footer class="cart-content"></footer>
+            </section>
+          </Tab>
           <Tab title="评价">评价</Tab>
         </Tabs>
       </ConfigProvider>
@@ -40,20 +75,27 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Tag, Tab, Tabs, ConfigProvider } from 'vant'
+import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon } from 'vant'
+import MenuDetailList from '@/components/menuDetailList/index.vue'
 
 export default defineComponent({
-  components: { Tag, Tab, Tabs, ConfigProvider },
+  components: { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, MenuDetailList },
   setup () {
     // 样式设置
     const themeVars = {
       tabTextColor: '#666',
       tabActiveTextColor: '#3190e8',
-      tabsBottomBarColor: '#3190e8'
+      tabsBottomBarColor: '#3190e8',
+      sidebarSelectedBorderColor: '#3190e8',
+      sidebarSelectedBorderHeight: '100%',
+      sidebarSelectedTextColor: '#666',
+      sidebarSelectedFontWeight: '700',
+      sidebarBackgroundColor: '#f5f5f5'
     }
     const currentTab = ref(0)
+    const currentBar = ref(0)
 
-    return { currentTab, themeVars }
+    return { currentTab, themeVars, currentBar }
   }
 })
 </script>
@@ -164,6 +206,55 @@ export default defineComponent({
         .goForActivity{
           color: #fff;
         }
+      }
+    }
+  }
+  .shop-detail-message{
+    overflow-y: auto;
+    .good-tag-lists{
+      display: flex;
+      flex-direction: column;
+      .good-list-content{
+        display: flex;
+        flex: 1;
+        .good-lists{
+          background-color: #f5f5f5;
+          overflow-y: auto;
+          flex: 1;
+          .menu-detail-header{
+            display: flex;
+            justify-content: space-between;
+            padding: .09rem;
+            align-items: center;
+            .menu-title{
+              width: 11rem;
+              white-space: nowrap;
+              overflow: hidden;
+              strong{
+                font-size: .16rem;
+                color: #666;
+                font-weight: 700;
+                margin-right: .08rem;
+              }
+              span{
+                font-size: .12rem;
+                color: #999;
+                width: 30%;
+                overflow: hidden;
+              }
+            }
+          }
+        }
+      }
+      .cart-content{
+        height: .49rem;
+        position: absolute;
+        background-color: #3d3d3f;
+        bottom: 0;
+        left: 0;
+        z-index: 13;
+        display: flex;
+        width: 100%;
       }
     }
   }

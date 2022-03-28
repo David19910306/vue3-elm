@@ -77,10 +77,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, toRefs, Ref } from 'vue'
+import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
 import { DropdownMenu, DropdownItem, ConfigProvider, Tag, Button, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
-import httpRequest from '@/api'
+// import httpRequest from '@/api'
 import { useStore } from 'vuex'
 import ClickSpan from '@/components/clickSpan/index.vue'
 import { useRoute } from 'vue-router'
