@@ -30,16 +30,16 @@
         <span>200</span>
       </section>
       <section class="cart-module">
-        <!-- <section class="cart-button">
+        <section class="cart-button">
           <span class="iconfont icon-jianshao"></span>
           <span class="cart-num">1</span>
           <span class="iconfont icon-jia"></span>
-        </section> -->
-        <section class="choose-specification">
+        </section>
+        <!-- <section class="choose-specification">
           <span class="iconfont icon-jianshao"></span>
           <span class="cart-num">1</span>
           <Tag type="primary" size="medium">选规格</Tag>
-        </section>
+        </section> -->
       </section>
     </footer>
   </section>

@@ -28,13 +28,13 @@
       </section>
     </header>
     <section class="shop-detail-message">
-      <ConfigProvider :theme-vars="themeVars">
-        <Tabs v-model:active="currentTab" border type="line">
-          <Tab title="商品">
-            <section class="good-tag-lists">
+      <ConfigProvider :theme-vars="themeVars" style="height: 100%;">
+        <Tabs v-model:active="currentTab" border type="line" style="height: 100%;">
+          <Tab title="商品" style="height: 100%;">
+            <!-- <section class="good-tag-lists"> -->
               <section class="good-list-content">
                 <Sidebar v-model="currentBar">
-                  <sidebar-item title="标签1"></sidebar-item>
+                  <sidebar-item title="标签1" badge="3"></sidebar-item>
                   <sidebar-item title="标签2"></sidebar-item>
                   <sidebar-item title="标签3"></sidebar-item>
                   <sidebar-item title="标签4"></sidebar-item>
@@ -43,6 +43,9 @@
                   <sidebar-item title="标签7"></sidebar-item>
                   <sidebar-item title="标签8"></sidebar-item>
                   <sidebar-item title="标签9"></sidebar-item>
+                  <sidebar-item title="标签10"></sidebar-item>
+                  <sidebar-item title="标签11"></sidebar-item>
+                  <sidebar-item title="标签12"></sidebar-item>
                 </Sidebar>
                 <section class="good-lists">
                   <ul>
@@ -63,8 +66,22 @@
                   </ul>
                 </section>
               </section>
-              <footer class="cart-content"></footer>
-            </section>
+            <!-- </section> -->
+            <footer class="cart-content">
+              <section class="cart-icon">
+                <section class="cart-container">
+                  <i class="iconfont icon-gouwuche"></i>
+                </section>
+                <section class="show-money">
+                  <span>￥ 0.00</span>
+                  <span>配送费￥5</span>
+                </section>
+              </section>
+              <section class="goto-pay">
+                <span>还差20元起送</span>
+                <!-- <span>去结算</span> -->
+              </section>
+            </footer>
           </Tab>
           <Tab title="评价">评价</Tab>
         </Tabs>
@@ -100,7 +117,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .food-list-container{
   height: 100%;
   display: flex;
@@ -211,12 +228,17 @@ export default defineComponent({
   }
   .shop-detail-message{
     overflow-y: auto;
-    .good-tag-lists{
-      display: flex;
-      flex-direction: column;
+    flex: 1;
+    .van-tabs__content{
+      height: calc(100% - 0.44rem);
+    }
+    // .good-tag-lists{
+      // display: flex;
+      // flex-direction: column;
       .good-list-content{
         display: flex;
         flex: 1;
+        height: calc(100% - 0.49rem);
         .good-lists{
           background-color: #f5f5f5;
           overflow-y: auto;
@@ -246,15 +268,65 @@ export default defineComponent({
           }
         }
       }
-      .cart-content{
-        height: .49rem;
-        position: absolute;
-        background-color: #3d3d3f;
-        bottom: 0;
-        left: 0;
-        z-index: 13;
-        display: flex;
-        width: 100%;
+    // }
+    .cart-content{
+      height: .49rem;
+      position: absolute;
+      background-color: #3d3d3f;
+      bottom: 0;
+      left: 0;
+      z-index: 13;
+      display: flex;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      .cart-icon{
+        // margin-left: .2rem;
+        .cart-container{
+          display: flex;
+          background-color: #3d3d3d;
+          position: absolute;
+          padding: .1rem;
+          border: .05rem solid #444;
+          border-radius: 50%;
+          left: .2rem;
+          top: -0.25rem;
+          i{
+            color: #fff;
+            font-size: .3rem;
+          }
+        }
+        .show-money{
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-evenly;
+          align-items: center;
+          left: .8rem;
+          color: #fff;
+          height: 100%;
+          margin-left: .02rem;
+          span:first-child{
+            font-size: .18rem;
+            font-weight: 700;
+          }
+          span:last-child{
+            font-size: .12rem;
+          }
+        }
+      }
+      .goto-pay{
+        background-color: #535356;//#4cd964;
+        height: 100%;
+        width: 1.17rem;
+        text-align: center;
+        text-align: center;
+        span{
+          font-size: .15rem;
+          color: #fff;
+          font-weight: 700;
+          line-height: .49rem;
+        }
       }
     }
   }
