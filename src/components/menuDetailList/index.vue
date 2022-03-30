@@ -2,57 +2,112 @@
   <section class="menu-detail-list">
     <div class="menu-detail-link">
       <section class="food-detail-img">
-        <img src="https://elm.cangdu.org/img/16f4162bb0262234.jpg" alt="food-image" />
+        <img :src="food.image_path.startsWith('blob')? 'http://img.daimg.com/uploads/allimg/140505/1-140505004P3.jpg'
+          :`https://elm.cangdu.org/img/${food.image_path}`" alt="food-image" />
       </section>
       <section class="food-detail-description">
         <h3 class="food-description-head">
-          <strong class="description-food-name">长沙喜茶</strong>
-          <ul class="attribute-ul">
-            <li class="attribute-new">
+          <strong class="description-food-name">{{food.name}}</strong>
+          <ul class="attribute-ul" v-if="food.attributes.length > 0">
+            <li class="attribute-new" v-if="food.attributes.find(attribute => attribute && attribute.icon_name === '新')">
               <p style="color:#fff">新品</p>
             </li>
-            <li><Tag plain type="danger">招牌</Tag></li>
+            <li>
+              <Tag style="margin-right: .03rem;" plain :color="attribute? `#${attribute.icon_color}`: '#ff1200'" v-for="(attribute, index) in food.attributes" :key="index">
+                <template v-if="attribute">{{attribute.icon_name}}</template>
+              </Tag>
+            </li>
           </ul>
         </h3>
-        <p class="food-description-content">味道好寂寥</p>
+        <p class="food-description-content" v-if="food.description">{{food.description}}</p>
         <p class="food-sail-rating">
-          <span>月售739份</span>
-          <span>好评率83%</span>
+          <span>{{food.tips.split(' ')[1]}}</span>
+          <span>好评率{{food.satisfy_rate}}%</span>
         </p>
-        <p class="food-activity">
-          <Tag plain type="danger">没有货的</Tag>
+        <p class="food-activity" v-if="food.activity">
+          <Tag plain type="danger">{{food.activity.image_text}}</Tag>
         </p>
       </section>
     </div>
     <footer class="menu-detail-footer">
       <section class="food-price">
         <span>￥</span>
-        <span>200</span>
+        <span>{{food.specfoods[0].price}}</span>
       </section>
       <section class="cart-module">
-        <section class="cart-button">
-          <span class="iconfont icon-jianshao"></span>
-          <span class="cart-num">1</span>
+        <section class="cart-button" v-if="food.specifications.length === 0">
+          <!-- <span class="iconfont icon-jianshao"></span>
+          <span class="cart-num">1</span> -->
           <span class="iconfont icon-jia"></span>
         </section>
-        <!-- <section class="choose-specification">
-          <span class="iconfont icon-jianshao"></span>
-          <span class="cart-num">1</span>
-          <Tag type="primary" size="medium">选规格</Tag>
-        </section> -->
+        <section class="choose-specification" v-else>
+          <!-- <span class="iconfont icon-jianshao choose-specifications"></span>
+          <span class="cart-num">1</span> -->
+          <Tag type="primary" size="medium" @click="chooseSpecification()">选规格</Tag>
+        </section>
       </section>
     </footer>
   </section>
+  <ConfigProvider :theme-vars="themeVars">
+    <van-dialog v-model:show="show" :show-confirm-button="false">
+      <section class="food-specification">
+        <header class="spec-food-header">
+          <h4>{{food.name}}</h4>
+          <Icon name="cross" size="0.23rem" @click="closeDialog()"/>
+        </header>
+        <section class="spec-food-content">
+          <h5>规格</h5>
+          <section class="spec-tag">
+            <Tag @click="clickCurrentTag(spec.food_id)" v-for="spec in food.specfoods" :key="spec.food_id" plain
+              :color="`${currentSpecsId === spec.food_id? '#3199e8': '#aaa'}`"
+              style="margin: 0 0.08rem 0.07rem 0" size="large">{{spec.specs_name}}</Tag>
+          </section>
+        </section>
+        <footer class="spec-footer">
+          <div class="specs_price"><span>¥</span><span>{{currentPrice}}</span></div>
+          <Button type="primary" size="small" @click="closeDialog()">加入购物车</Button>
+        </footer>
+      </section>
+    </van-dialog>
+  </ConfigProvider>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { Tag } from 'vant'
+import { defineComponent, ref } from 'vue'
+import { Tag, Dialog, Icon, ConfigProvider, Button } from 'vant'
 
 export default defineComponent({
-  components: { Tag },
-  setup () {
-    console.log('oo')
+  components: { Tag, [Dialog.Component.name]: Dialog.Component, Icon, ConfigProvider, Button },
+  props: ['food'],
+  setup (props) {
+    // console.log(props.food)
+    // 自定义样式风格
+    const themeVars = {
+      dialogBorderRadius: '.05rem',
+      tagDefaultColor: '#333',
+      tagLargePadding: '0.09rem 0.14rem'
+    }
+
+    const show = ref(false) // 对话框默认关闭
+    const currentSpecsId = ref(props.food.specfoods[0].food_id) // 默认选中第一个
+    const currentPrice = ref(props.food.specfoods[0].price) // 显示第一个标签的价格
+    // 选规格事件,打开对话框
+    const chooseSpecification = () => {
+      show.value = !show.value
+    }
+    // 关闭对话框
+    const closeDialog = () => {
+      show.value = false
+    }
+
+    // 选择当前的规格标签
+    const clickCurrentTag = (foodId:number) => {
+      currentSpecsId.value = foodId
+      // eslint-disable-next-line camelcase
+      currentPrice.value = props.food.specfoods.find((spec:Record<string, any>) => spec.food_id === foodId).price
+    }
+
+    return { themeVars, chooseSpecification, show, closeDialog, clickCurrentTag, currentSpecsId, currentPrice }
   }
 })
 </script>
@@ -85,6 +140,10 @@ export default defineComponent({
           color: #333;
           font-size: .16rem;
           font-weight: 600;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 1.8rem;
         }
         .attribute-ul{
           display: flex;
@@ -178,7 +237,7 @@ export default defineComponent({
       .choose-specification{
         display: flex;
         align-items: center;
-        span:first-child {
+        .choose-specifications {
           color: #3190e8;
           font-size: .16rem;
         }
@@ -189,6 +248,60 @@ export default defineComponent({
           text-align: center;
           font-family: "Helvetica Neue,Tahoma";
         }
+      }
+    }
+  }
+}
+
+// 对话框样式风格
+.food-specification{
+  .spec-food-header{
+    padding: .17rem .1rem;
+    position: relative;
+    h4{
+      font-size: .18rem;
+      color: #222;
+      font-weight: 600;
+      text-align: center;
+    }
+    i{
+      position: absolute;
+      top: .05rem;
+      right: .05rem;
+    }
+  }
+  .spec-food-content{
+    padding: 0 .2rem;
+    h5{
+      font-size: .15rem;
+      color: #666;
+    }
+    .spec-tag{
+      padding: .1rem 0;
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+  .spec-footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 0.12rem;
+    border: 1px;
+    border-bottom-left-radius: 0.05rem;
+    border-bottom-right-radius: 0.05rem;
+    .specs_price{
+      span{
+        color: #ff6000;
+      }
+      span:first-child{
+        font-size: .12rem;
+      }
+      span:last-child{
+        font-size: .19rem;
+        font-weight: 700;
+        font-family: "Helvetica Neue,Tahoma";
       }
     }
   }

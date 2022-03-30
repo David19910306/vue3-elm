@@ -46,7 +46,7 @@
                         </section>
                         <Icon name="ellipsis" size="15" color="#969696"/>
                       </header>
-                      <menu-detail-list v-for="list in item.foods" :key="list.item_id"></menu-detail-list>
+                      <menu-detail-list v-for="list in item.foods" :key="list.item_id" :food="list"></menu-detail-list>
                     </li>
                   </ul>
                 </section>
@@ -254,6 +254,7 @@ export default defineComponent({
         display: flex;
         flex: 1;
         height: calc(100% - 0.49rem);
+        background-color: #f5f5f5;
         .good-lists{
           background-color: #f5f5f5;
           overflow-y: auto;
