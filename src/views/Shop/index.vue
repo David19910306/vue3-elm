@@ -1,23 +1,23 @@
 <template>
   <section class="food-list-container">
-    <nav><span class="iconfont icon-fangxiang-zuo"></span></nav>
+    <nav @click="goBack"><span class="iconfont icon-fangxiang-zuo"></span></nav>
     <header class="shop-header-detail">
       <div class="header-cover-img-con">
-        <img src="https://elm.cangdu.org/img/17fba6e16ee104399.png" alt="coverImage" class="header-cover-img">
+        <img :src="`https://elm.cangdu.org/img/${restaurantInfo.image_path}`" alt="coverImage" class="header-cover-img">
       </div>
       <section class="description-header">
         <router-link class="description-top" to="/">
           <section class="description-left">
-            <img src="https://elm.cangdu.org/img/17fba6e16ee104399.png">
+            <img :src="`https://elm.cangdu.org/img/${restaurantInfo.image_path}`">
           </section>
           <section class="description-right">
-            <h4 class="description-title ellipsis">快快快111122233</h4>
-            <p class="description-text">商家配送／分钟送达／配送费¥5</p>
-            <p class="description-promotion ellipsis">公告：欢迎光临，用餐高峰请提前下单，谢谢</p>
+            <h4 class="description-title ellipsis">{{restaurantInfo.name}}</h4>
+            <p class="description-text">商家配送／分钟送达／{{restaurantInfo.piecewise_agent_fee.tips}}</p>
+            <p class="description-promotion ellipsis">公告：{{restaurantInfo.promotion_info}}</p>
           </section>
           <span class="iconfont icon-fangxiang-you goForward"></span>
         </router-link>
-        <footer class="description-footer">
+        <footer class="description-footer" v-if="restaurantInfo.activities.length > 0">
           <p class="ellipsis">
             <Tag type="danger">减</Tag>
             <span>满30减5，满60减8（APP专享）</span>
@@ -34,34 +34,19 @@
             <!-- <section class="good-tag-lists"> -->
               <section class="good-list-content">
                 <Sidebar v-model="currentBar">
-                  <sidebar-item title="标签1" badge="3"></sidebar-item>
-                  <sidebar-item title="标签2"></sidebar-item>
-                  <sidebar-item title="标签3"></sidebar-item>
-                  <sidebar-item title="标签4"></sidebar-item>
-                  <sidebar-item title="标签5"></sidebar-item>
-                  <sidebar-item title="标签6"></sidebar-item>
-                  <sidebar-item title="标签7"></sidebar-item>
-                  <sidebar-item title="标签8"></sidebar-item>
-                  <sidebar-item title="标签9"></sidebar-item>
-                  <sidebar-item title="标签10"></sidebar-item>
-                  <sidebar-item title="标签11"></sidebar-item>
-                  <sidebar-item title="标签12"></sidebar-item>
+                  <sidebar-item v-for="menu in menus" :key="menu.id" :title="menu.name"></sidebar-item>
                 </Sidebar>
                 <section class="good-lists">
                   <ul>
-                    <li>
+                    <li v-for="item in menus" :key="item.id">
                       <header class="menu-detail-header">
                         <section class="menu-title">
-                          <strong>无内鬼</strong>
-                          <span>与枚举</span>
+                          <strong>{{item.name}}</strong>
+                          <span>{{item.description}}</span>
                         </section>
                         <Icon name="ellipsis" size="15" color="#969696"/>
                       </header>
-                      <menu-detail-list></menu-detail-list>
-                      <menu-detail-list></menu-detail-list>
-                      <menu-detail-list></menu-detail-list>
-                      <menu-detail-list></menu-detail-list>
-                      <menu-detail-list></menu-detail-list>
+                      <menu-detail-list v-for="list in item.foods" :key="list.item_id"></menu-detail-list>
                     </li>
                   </ul>
                 </section>
@@ -91,9 +76,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
 import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon } from 'vant'
 import MenuDetailList from '@/components/menuDetailList/index.vue'
+import useFetchRequest from '@/hook/shop/useFetch'
+import { useRoute, useRouter } from 'vue-router'
+import { IFetchResult } from '@/interface'
 
 export default defineComponent({
   components: { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, MenuDetailList },
@@ -112,7 +100,34 @@ export default defineComponent({
     const currentTab = ref(0)
     const currentBar = ref(0)
 
-    return { currentTab, themeVars, currentBar }
+    const route = useRoute() // 当前路由对象
+    const router = useRouter() // 路由跳转对象
+    const { id } = route.params
+
+    const state:IFetchResult = reactive({
+      restaurantInfo: {
+        activities: [],
+        piecewise_agent_fee: {}
+      },
+      menus: []
+    })
+
+    // 回退到上一步
+    const goBack = () => {
+      router.go(-1)
+    }
+
+    // 获取餐馆详情
+    onMounted(async () => {
+      const { restaurantInfo, menus } = await useFetchRequest({ shopId: id, restaurant_id: id })
+      // console.log(restaurantInfo, menus)
+      //   const { restaurantInfo } = await useFetchRequest().fetchRestaurantInfo(id)
+      //   const { menus } = await useFetchRequest().getMenus(restaurantInfo.value.id)
+      //   console.log(menus)
+      state.restaurantInfo = restaurantInfo.value
+      state.menus = menus.value
+    })
+    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state) }
   }
 })
 </script>

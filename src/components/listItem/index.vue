@@ -44,10 +44,11 @@ export default defineComponent({
   props: ['list'],
   setup (props) {
     const shiningCount = ref(props.list.rating)
+    const id = ref(props.list.id)
     const router = useRouter()
     const jumpToFoodList = () => {
       router.push({
-        path: '/shop'
+        path: `/shop/${id.value}`
       })
     }
     return { shiningCount, jumpToFoodList }

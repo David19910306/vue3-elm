@@ -1,14 +1,6 @@
 import httpRequest from '@/api'
 import { reactive } from 'vue'
-import { IResult } from '@/interface'
-
-interface IRequestFunc{
-  onMountedRequest: () => Promise<IResult>,
-  filterBySpecs: (id:number) => Promise<IResult>,
-  filterBySorts: (order:number) => Promise<IResult>,
-  // eslint-disable-next-line camelcase
-  filterByCondition: (delivery_mode:[], support_ids:[]) => Promise<IResult>
-}
+import { IResult, IRequestFunc } from '@/interface'
 
 export default function useRequest (latitude:string, longitude:string):IRequestFunc {
   const requestResult = reactive({
