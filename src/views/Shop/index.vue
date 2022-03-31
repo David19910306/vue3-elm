@@ -59,13 +59,13 @@
                   <i class="iconfont icon-gouwuche"></i>
                 </section>
                 <section class="show-money">
-                  <span>￥ 0.00</span>
+                  <span>￥ {{totalPrice}}</span>
                   <span>配送费￥5</span>
                 </section>
               </section>
-              <section class="goto-pay">
-                <span>还差20元起送</span>
-                <!-- <span>去结算</span> -->
+              <section class="goto-pay" :style="`background-color: ${20 -totalPrice > 0? '#535356': '#4cd964'}`">
+                <span v-if="20 - totalPrice > 0">还差{{20 - totalPrice}}元起送</span>
+                <span v-else>去结算</span>
               </section>
             </footer>
           </Tab>
@@ -119,6 +119,10 @@ export default defineComponent({
       }, {})
     })
 
+    const totalPrice = computed(() => {
+      return store.state.cartFoods.reduce((previous:number, current:Record<string, any>) => previous + current.foodCount * current.price, 0)
+    })
+
     const state:IFetchResult = reactive({
       restaurantInfo: {
         activities: [],
@@ -142,7 +146,7 @@ export default defineComponent({
       state.restaurantInfo = restaurantInfo.value
       state.menus = menus.value
     })
-    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state), store, badge }
+    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state), store, badge, totalPrice }
   }
 })
 </script>
@@ -347,7 +351,7 @@ export default defineComponent({
         }
       }
       .goto-pay{
-        background-color: #535356;//#4cd964;
+        // background-color: #535356;//#4cd964;
         height: 100%;
         width: 1.17rem;
         text-align: center;
