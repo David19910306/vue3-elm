@@ -104,6 +104,9 @@ export default defineComponent({
     const router = useRouter() // 路由跳转对象
     const { id } = route.params
 
+    // const store = useStore()
+    // const cartFoods = store.getters.getCartFoods
+
     const state:IFetchResult = reactive({
       restaurantInfo: {
         activities: [],

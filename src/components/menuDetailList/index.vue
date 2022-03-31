@@ -8,7 +8,7 @@
       <section class="food-detail-description">
         <h3 class="food-description-head">
           <strong class="description-food-name">{{food.name}}</strong>
-          <ul class="attribute-ul" v-if="food.attributes.length > 0">
+          <ul class="attribute-ul" v-if="food.attributes.length > 0 && food.attributes[0] !== null">
             <li class="attribute-new" v-if="food.attributes.find(attribute => attribute && attribute.icon_name === '新')">
               <p style="color:#fff">新品</p>
             </li>
@@ -36,13 +36,17 @@
       </section>
       <section class="cart-module">
         <section class="cart-button" v-if="food.specifications.length === 0">
-          <!-- <span class="iconfont icon-jianshao"></span>
-          <span class="cart-num">1</span> -->
-          <span class="iconfont icon-jia"></span>
+          <template v-if="store.state.cartFoods.length > 0 && store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id)">
+            <span class="iconfont icon-jianshao"></span>
+            <span class="cart-num">{{store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id).foodCount}}</span>
+          </template>
+          <span class="iconfont icon-jia" @click="chooseSpecFoods"></span>
         </section>
         <section class="choose-specification" v-else>
-          <!-- <span class="iconfont icon-jianshao choose-specifications"></span>
-          <span class="cart-num">1</span> -->
+          <template v-if="store.state.cartFoods.length > 0 && store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id)">
+            <span class="iconfont icon-jianshao choose-specifications"></span>
+            <span class="cart-num">{{specsTotal}}</span>
+          </template>
           <Tag type="primary" size="medium" @click="chooseSpecification()">选规格</Tag>
         </section>
       </section>
@@ -65,7 +69,7 @@
         </section>
         <footer class="spec-footer">
           <div class="specs_price"><span>¥</span><span>{{currentPrice}}</span></div>
-          <Button type="primary" size="small" @click="closeDialog()">加入购物车</Button>
+          <Button type="primary" size="small" @click="addToCart(),closeDialog()">加入购物车</Button>
         </footer>
       </section>
     </van-dialog>
@@ -73,26 +77,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 import { Tag, Dialog, Icon, ConfigProvider, Button } from 'vant'
+import { addFoodsToCart } from '@/hook/cart'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   components: { Tag, [Dialog.Component.name]: Dialog.Component, Icon, ConfigProvider, Button },
   props: ['food'],
   setup (props) {
-    // console.log(props.food)
     // 自定义样式风格
     const themeVars = {
       dialogBorderRadius: '.05rem',
       tagDefaultColor: '#333',
       tagLargePadding: '0.09rem 0.14rem'
     }
+    const store = useStore()
 
     const show = ref(false) // 对话框默认关闭
+    const specShow = ref(false)
     const currentSpecsId = ref(props.food.specfoods[0].food_id) // 默认选中第一个
     const currentPrice = ref(props.food.specfoods[0].price) // 显示第一个标签的价格
+
     // 选规格事件,打开对话框
     const chooseSpecification = () => {
+      // currentItemId.value = itemId
+      // console.log(currentItemId.value)
       show.value = !show.value
     }
     // 关闭对话框
@@ -107,7 +117,54 @@ export default defineComponent({
       currentPrice.value = props.food.specfoods.find((spec:Record<string, any>) => spec.food_id === foodId).price
     }
 
-    return { themeVars, chooseSpecification, show, closeDialog, clickCurrentTag, currentSpecsId, currentPrice }
+    // 直接選擇的商品
+    const chooseSpecFoods = () => {
+      specShow.value = true
+      addFoodsToCart(store, props.food, props.food.item_id)
+      // console.log(itemId, store.state.cartFoods)
+    }
+
+    // watch(cartFoods, () => {
+    //   console.log(cartFoods.length)
+    // }, { immediate: true, deep: true })
+
+    // 计算属性
+    const specsTotal = computed(() => {
+      const final = store.state.cartFoods.reduce((acc:Record<string, any>, food:Record<string, any>) => {
+        const key = food.item_id
+        if (!acc[key]) {
+          acc[key] = []
+        }
+        acc[key].push(food)
+        return acc
+      }, {})
+      console.log(final)
+      for (const key in final) {
+        return final[key].reduce((previous:number, current:Record<string, any>) => previous + current.foodCount, 0)
+      }
+      return 0
+    })
+
+    // 添加购物车
+    const addToCart = () => {
+      addFoodsToCart(store, props.food, currentSpecsId.value)
+      specShow.value = true
+    }
+
+    return {
+      themeVars,
+      chooseSpecification,
+      show,
+      closeDialog,
+      clickCurrentTag,
+      currentSpecsId,
+      currentPrice,
+      addToCart,
+      chooseSpecFoods,
+      specShow,
+      store,
+      specsTotal
+    }
   }
 })
 </script>
