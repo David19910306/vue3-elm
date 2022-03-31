@@ -13,6 +13,18 @@ const mutations: MutationTree<State> = {
     // console.log(newFood)
     state.cartFoods = [{ ...newFood }, ...state.cartFoods.filter(food => food.food_id !== payload.food_id)]
     // console.log(state.cartFoods)
+  },
+  deleteFood (state: State, payload:number):void{
+    const delFood = state.cartFoods.find(cartFood => cartFood.item_id === payload)
+    // console.log(delFood)
+    // console.log({ foodCount: delFood && --delFood.foodCount, ...delFood })
+    // console.log(state.cartFoods.filter(cartFood => cartFood.item_id !== payload))
+    // delFood? --delFood.foodCount > 0?
+    // state.cartFoods = [{ foodCount: delFood.foodCount, ...delFood }, ...state.cartFoods.filter(cartFood => cartFood.item_id !== payload)]
+    if (delFood) {
+      --delFood.foodCount > 0 ? state.cartFoods = [{ foodCount: delFood.foodCount, ...delFood }, ...state.cartFoods.filter(cartFood => cartFood.item_id !== payload)]
+        : state.cartFoods = [...state.cartFoods.filter(cartFood => cartFood.item_id !== payload)]
+    }
   }
 }
 

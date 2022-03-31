@@ -3,7 +3,7 @@
     <div class="menu-detail-link">
       <section class="food-detail-img">
         <img :src="food.image_path.startsWith('blob')? 'http://img.daimg.com/uploads/allimg/140505/1-140505004P3.jpg'
-          :`https://elm.cangdu.org/img/${food.image_path}`" alt="food-image" />
+          : food.image_path.startsWith('https')? `${food.image_path}`: `https://elm.cangdu.org/img/${food.image_path}`" alt="food-image" />
       </section>
       <section class="food-detail-description">
         <h3 class="food-description-head">
@@ -37,17 +37,17 @@
       <section class="cart-module">
         <section class="cart-button" v-if="food.specifications.length === 0">
           <template v-if="store.state.cartFoods.length > 0 && store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id)">
-            <span class="iconfont icon-jianshao"></span>
+            <span class="iconfont icon-jianshao" @click="deleteFood(food.item_id)"></span>
             <span class="cart-num">{{store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id).foodCount}}</span>
           </template>
           <span class="iconfont icon-jia" @click="chooseSpecFoods"></span>
         </section>
         <section class="choose-specification" v-else>
           <template v-if="store.state.cartFoods.length > 0 && store.state.cartFoods.find(cartFood => cartFood.item_id === food.item_id)">
-            <span class="iconfont icon-jianshao choose-specifications"></span>
-            <span class="cart-num">{{specsTotal}}</span>
+            <span class="iconfont icon-jianshao choose-specifications" @click="Toast({message:'多规格商品请在购物车中删除...', position: 'bottom'})"></span>
+            <span class="cart-num">{{specsTotal[food.item_id].reduce((previous, current) => previous + current.foodCount, 0)}}</span>
           </template>
-          <Tag type="primary" size="medium" @click="chooseSpecification()">选规格</Tag>
+          <Tag type="primary" size="medium" @click="show = !show">选规格</Tag>
         </section>
       </section>
     </footer>
@@ -57,7 +57,7 @@
       <section class="food-specification">
         <header class="spec-food-header">
           <h4>{{food.name}}</h4>
-          <Icon name="cross" size="0.23rem" @click="closeDialog()"/>
+          <Icon name="cross" size="0.23rem" @click="show = false"/>
         </header>
         <section class="spec-food-content">
           <h5>规格</h5>
@@ -69,7 +69,7 @@
         </section>
         <footer class="spec-footer">
           <div class="specs_price"><span>¥</span><span>{{currentPrice}}</span></div>
-          <Button type="primary" size="small" @click="addToCart(),closeDialog()">加入购物车</Button>
+          <Button type="primary" size="small" @click="addToCart(),show = false">加入购物车</Button>
         </footer>
       </section>
     </van-dialog>
@@ -78,8 +78,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue'
-import { Tag, Dialog, Icon, ConfigProvider, Button } from 'vant'
-import { addFoodsToCart } from '@/hook/cart'
+import { Tag, Dialog, Icon, ConfigProvider, Button, Toast } from 'vant'
+import { addFoodsToCart, minusFoodInCart } from '@/hook/cart'
 import { useStore } from 'vuex'
 
 export default defineComponent({
@@ -99,17 +99,6 @@ export default defineComponent({
     const currentSpecsId = ref(props.food.specfoods[0].food_id) // 默认选中第一个
     const currentPrice = ref(props.food.specfoods[0].price) // 显示第一个标签的价格
 
-    // 选规格事件,打开对话框
-    const chooseSpecification = () => {
-      // currentItemId.value = itemId
-      // console.log(currentItemId.value)
-      show.value = !show.value
-    }
-    // 关闭对话框
-    const closeDialog = () => {
-      show.value = false
-    }
-
     // 选择当前的规格标签
     const clickCurrentTag = (foodId:number) => {
       currentSpecsId.value = foodId
@@ -120,6 +109,7 @@ export default defineComponent({
     // 直接選擇的商品
     const chooseSpecFoods = () => {
       specShow.value = true
+      // console.log(props.food)
       addFoodsToCart(store, props.food, props.food.item_id)
       // console.log(itemId, store.state.cartFoods)
     }
@@ -130,7 +120,8 @@ export default defineComponent({
 
     // 计算属性
     const specsTotal = computed(() => {
-      const final = store.state.cartFoods.reduce((acc:Record<string, any>, food:Record<string, any>) => {
+      // 返回item_id相同的food对象
+      return store.state.cartFoods.reduce((acc:Record<string, any>, food:Record<string, any>) => {
         const key = food.item_id
         if (!acc[key]) {
           acc[key] = []
@@ -138,24 +129,30 @@ export default defineComponent({
         acc[key].push(food)
         return acc
       }, {})
-      console.log(final)
-      for (const key in final) {
-        return final[key].reduce((previous:number, current:Record<string, any>) => previous + current.foodCount, 0)
-      }
-      return 0
+      // for (const key in final) {
+      //   return final[key].reduce((previous:number, current:Record<string, any>) => previous + current.foodCount, 0)
+      // }
+      // return 0
     })
 
     // 添加购物车
     const addToCart = () => {
+      // console.log(props.food)
       addFoodsToCart(store, props.food, currentSpecsId.value)
       specShow.value = true
     }
 
+    // 删除非多规格的商品
+    const deleteFood = (itemId:number) => {
+      // console.log(itemId)
+      // const delFood = store.state.cartFoods.find((cartFood:Record<string, any>) => cartFood.item_id === itemId)
+      // --delFood.foodCount
+      minusFoodInCart(store, itemId)
+    }
+
     return {
       themeVars,
-      chooseSpecification,
       show,
-      closeDialog,
       clickCurrentTag,
       currentSpecsId,
       currentPrice,
@@ -163,7 +160,9 @@ export default defineComponent({
       chooseSpecFoods,
       specShow,
       store,
-      specsTotal
+      specsTotal,
+      Toast,
+      deleteFood
     }
   }
 })

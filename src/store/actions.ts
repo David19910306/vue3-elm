@@ -7,6 +7,9 @@ const actions:ActionTree<State, State> = {
   },
   recordFoods (context, payload:{[propName:string]: any}): void{
     context.commit('recordFoods', payload)
+  },
+  deleteFood (context, payload:number):void{
+    context.commit('deleteFood', payload)
   }
 }
 

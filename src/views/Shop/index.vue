@@ -34,7 +34,8 @@
             <!-- <section class="good-tag-lists"> -->
               <section class="good-list-content">
                 <Sidebar v-model="currentBar">
-                  <sidebar-item v-for="menu in menus" :key="menu.id" :title="menu.name"></sidebar-item>
+                  <sidebar-item v-for="menu in menus" :key="menu.id" :title="menu.name"
+                    :badge="badge[menu.id] && badge[menu.id].reduce((previous, current) => previous + current.foodCount, 0)"></sidebar-item>
                 </Sidebar>
                 <section class="good-lists">
                   <ul>
@@ -76,12 +77,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
 import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon } from 'vant'
 import MenuDetailList from '@/components/menuDetailList/index.vue'
 import useFetchRequest from '@/hook/shop/useFetch'
 import { useRoute, useRouter } from 'vue-router'
 import { IFetchResult } from '@/interface'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   components: { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, MenuDetailList },
@@ -104,8 +106,18 @@ export default defineComponent({
     const router = useRouter() // 路由跳转对象
     const { id } = route.params
 
-    // const store = useStore()
+    const store = useStore()
     // const cartFoods = store.getters.getCartFoods
+    const badge = computed(() => {
+      return store.state.cartFoods.reduce((acc:Record<string, any>, currentFood:Record<string, any>) => {
+        const key = currentFood.category_id
+        if (!acc[key]) {
+          acc[key] = []
+        }
+        acc[key].push(currentFood)
+        return acc
+      }, {})
+    })
 
     const state:IFetchResult = reactive({
       restaurantInfo: {
@@ -130,7 +142,7 @@ export default defineComponent({
       state.restaurantInfo = restaurantInfo.value
       state.menus = menus.value
     })
-    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state) }
+    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state), store, badge }
   }
 })
 </script>
