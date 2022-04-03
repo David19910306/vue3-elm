@@ -55,7 +55,9 @@
             <!-- </section> -->
             <footer class="cart-content">
               <section class="cart-icon">
-                <section class="cart-container">
+                <section class="cart-container" @click="cartFoodShow = !cartFoodShow" :style="{'background-color':
+                  `${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId))? '#3190e8': '#3d3d3d'}`}">
+                  <span class="cart-list-length" :style="{'display': `${cartFoodsNumber === 0? 'none': ''}`}">{{cartFoodsNumber}}</span>
                   <i class="iconfont icon-gouwuche"></i>
                 </section>
                 <section class="show-money">
@@ -63,7 +65,8 @@
                   <span>配送费￥5</span>
                 </section>
               </section>
-              <section class="goto-pay" :style="`background-color: ${20 -totalPrice > 0? '#535356': '#4cd964'}`">
+              <section class="goto-pay" :style="`background-color:
+                ${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) && (totalPrice - 20 >= 0)? '#4cd964': '#535356'}`">
                 <span v-if="20 - totalPrice > 0">还差{{20 - totalPrice}}元起送</span>
                 <span v-else>去结算</span>
               </section>
@@ -74,6 +77,34 @@
       </ConfigProvider>
     </section>
   </section>
+  <section class="cart-food-list" :style="{'display': `${cartFoodShow && store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) ? '': 'none'}`}">
+    <header>
+      <h4>购物车</h4>
+      <div @click="clearCart">
+        <Icon name="delete-o" size="15" />
+        <span class="clear-cart">清空</span>
+      </div>
+    </header>
+    <section class="cart-food-detail">
+      <ul>
+        <li class="cart-li" v-for="food in currentResturantCart" :key="food.food_id">
+          <div class="cart-list-num">
+            <p class="ellipsis">{{food.name}}</p>
+            <p class="ellipsis">{{food.specs_name}}</p>
+          </div>
+          <div class="cart-list-price">
+            <span>¥</span>
+            <span>{{food.price}}</span>
+          </div>
+          <section class="cart-list-control">
+            <span class="iconfont icon-jianshao" style="color: #3190e8" @click="decreseFood(food.food_id)"></span>
+            <span class="cart-num">{{food.foodCount}}</span>
+            <span class="iconfont icon-jia" style="color: #3190e8" @click="increseFood(food.food_id)"></span>
+          </section>
+        </li>
+      </ul>
+    </section>
+  </section>
 </template>
 
 <script lang="ts">
@@ -81,6 +112,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue
 import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon } from 'vant'
 import MenuDetailList from '@/components/menuDetailList/index.vue'
 import useFetchRequest from '@/hook/shop/useFetch'
+import { addFoodsAtCart, minusFoodAtCart, clearCartById } from '@/hook/cart'
 import { useRoute, useRouter } from 'vue-router'
 import { IFetchResult } from '@/interface'
 import { useStore } from 'vuex'
@@ -101,10 +133,13 @@ export default defineComponent({
     }
     const currentTab = ref(0)
     const currentBar = ref(0)
+    const restaurantId = ref('0') // 餐馆的id
+    const cartFoodShow = ref(false) // 点击显示购物车列表
 
     const route = useRoute() // 当前路由对象
     const router = useRouter() // 路由跳转对象
     const { id } = route.params
+    restaurantId.value = id as string
 
     const store = useStore()
     // const cartFoods = store.getters.getCartFoods
@@ -120,8 +155,33 @@ export default defineComponent({
     })
 
     const totalPrice = computed(() => {
-      return store.state.cartFoods.reduce((previous:number, current:Record<string, any>) => previous + current.foodCount * current.price, 0)
+      const array = store.state.cartFoods.reduce((previous:Record<string, any>[], current:Record<string, any>) => current.restaurant_id === parseInt(restaurantId.value) ? [current, ...previous] : previous, [])
+      return array.reduce((previous: number, current: Record<string, any>) => previous + current.price * current.foodCount, 0)
     })
+
+    const cartFoodsNumber = computed(() => {
+      return store.state.cartFoods.reduce((previous: number, food:Record<string, any>) => food.restaurant_id === parseInt(restaurantId.value) ? previous + food.foodCount : previous, 0)
+    })
+
+    const currentResturantCart = computed(() => {
+      return store.state.cartFoods.filter((food:Record<string, any>) => food.restaurant_id === parseInt(restaurantId.value))
+    })
+
+    // 购物车中增加按钮
+    const increseFood = (foodId: number) => {
+      addFoodsAtCart(store, foodId) // 在购物车中直接添加商品
+    }
+
+    // 购物车中减少按钮
+    const decreseFood = (foodId: number) => {
+      minusFoodAtCart(store, foodId) // 在购物车中直接删除商品
+    }
+
+    // 清空购物车按钮, 根据餐馆的id
+    const clearCart = () => {
+      // console.log(restaurantId)
+      clearCartById(store, restaurantId.value)
+    }
 
     const state:IFetchResult = reactive({
       restaurantInfo: {
@@ -146,7 +206,23 @@ export default defineComponent({
       state.restaurantInfo = restaurantInfo.value
       state.menus = menus.value
     })
-    return { currentTab, themeVars, currentBar, goBack, ...toRefs(state), store, badge, totalPrice }
+    return {
+      currentTab,
+      themeVars,
+      currentBar,
+      goBack,
+      ...toRefs(state),
+      store,
+      badge,
+      totalPrice,
+      restaurantId,
+      cartFoodsNumber,
+      cartFoodShow,
+      currentResturantCart,
+      decreseFood,
+      increseFood,
+      clearCart
+    }
   }
 })
 </script>
@@ -319,7 +395,7 @@ export default defineComponent({
         // margin-left: .2rem;
         .cart-container{
           display: flex;
-          background-color: #3d3d3d;
+          // background-color: #3d3d3d;
           position: absolute;
           padding: .1rem;
           border: .05rem solid #444;
@@ -329,6 +405,21 @@ export default defineComponent({
           i{
             color: #fff;
             font-size: .3rem;
+          }
+          .cart-list-length{
+            position: absolute;
+            top: -0.0575rem;
+            right: -0.0575rem;
+            background-color: #ff461d;
+            line-height: .16rem;
+            text-align: center;
+            border-radius: 50%;
+            border: 0.006rem solid #ff461d;
+            min-width: 0.16rem;
+            height: 0.16rem;
+            font-size: .115rem;
+            color: #fff;
+            font-family: Helvetica Neue,Tahoma,Arial;
           }
         }
         .show-money{
@@ -361,6 +452,79 @@ export default defineComponent({
           color: #fff;
           font-weight: 700;
           line-height: .49rem;
+        }
+      }
+    }
+  }
+}
+
+.cart-food-list{
+  position: absolute;
+  width: 100%;
+  padding-bottom: .49rem;
+  z-index: 12;
+  bottom: 0;
+  left: 0;
+  background-color: #fff;
+  header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.07rem 0.14rem;
+    background-color: #eceff1;
+    h4{
+      font-size: .164rem;
+      color: #666;
+    }
+    .clear-cart{
+      font-size: .14rem;
+      color: #666;
+    }
+  }
+  .cart-food-detail{
+    background-color: #fff;
+    max-height: 4.6rem;
+    overflow-y: auto;
+    .cart-li{
+      display: flex;
+      justify-content: space-between;
+      padding: 0.14rem 0.117rem;
+      align-items: center;
+      .cart-list-num{
+        width: 55%;
+        p:first-child{
+          font-size: .16rem;
+          color: #666;
+          font-weight: 700;
+        }
+        p:last-child{
+          font-size: .12rem;
+          color: #666;
+        }
+      }
+      .cart-list-price{
+        font-size: 0;
+        span:first-child{
+          font-size: .14rem;
+          color: #f60;
+          font-family: Helvetica Neue,Tahoma;
+        }
+        span:last-child{
+          font-size: .16rem;
+          color: #f60;
+          font-family: Helvetica Neue,Tahoma;
+          font-weight: 700;
+        }
+      }
+      .cart-list-control{
+        display: flex;
+        align-items: center;
+        .cart-num{
+          font-size: .15rem;
+          color: #666;
+          min-width: .23rem;
+          text-align: center;
+          font-family: Helvetica Neue,Tahoma;
         }
       }
     }

@@ -25,6 +25,24 @@ const mutations: MutationTree<State> = {
       --delFood.foodCount > 0 ? state.cartFoods = [{ foodCount: delFood.foodCount, ...delFood }, ...state.cartFoods.filter(cartFood => cartFood.item_id !== payload)]
         : state.cartFoods = [...state.cartFoods.filter(cartFood => cartFood.item_id !== payload)]
     }
+  },
+  // 在购物车中添加商品
+  addFoodInCart (state: State, payload: number):void{
+    const addFood = state.cartFoods.find((food: Record<string, any>) => food.food_id === payload)
+    if (addFood) ++addFood.foodCount
+  },
+  // 在购物车中删减商品
+  minusFoodInCart (state: State, payload: number):void{
+    const minusFood = state.cartFoods.find((food: Record<string, any>) => food.food_id === payload)
+    if (minusFood && --minusFood.foodCount === 0) {
+      state.cartFoods = [...state.cartFoods.filter(food => food.food_id !== payload)]
+    }
+  },
+  // 根据传过来的餐馆id，清空对应餐馆的购物车
+  clearCartById (state: State, payload: string):void{
+    // console.log(typeof payload)
+    state.cartFoods = [...state.cartFoods.filter(food => food.restaurant_id !== parseInt(payload))]
+    console.log(state.cartFoods)
   }
 }
 

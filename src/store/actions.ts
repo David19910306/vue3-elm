@@ -10,6 +10,15 @@ const actions:ActionTree<State, State> = {
   },
   deleteFood (context, payload:number):void{
     context.commit('deleteFood', payload)
+  },
+  addFoodInCart (context, payload: number):void{
+    context.commit('addFoodInCart', payload)
+  },
+  minusFoodInCart (context, payload: number):void{
+    context.commit('minusFoodInCart', payload)
+  },
+  clearCartById (context, payload: string):void{
+    context.commit('clearCartById', payload)
   }
 }
 
