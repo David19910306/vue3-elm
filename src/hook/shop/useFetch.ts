@@ -1,6 +1,7 @@
 import { reactive, toRefs, Ref } from 'vue'
 import httpRequest from '@/api'
 import { IFetchResult } from '@/interface'
+import { AxiosResponse } from 'axios'
 
 interface IState{
   restaurantInfo: IFetchResult,
@@ -14,9 +15,33 @@ interface IParams{
 }
 
 export interface IFetchRequest{
-  fetchRestaurantInfo: (shopId: any) => Promise<{ restaurantInfo: Ref<Record<string, any>> }>,
   // eslint-disable-next-line camelcase
-  getMenus: (restaurant_id: number) => Promise<{ menus: Ref<Record<string, any>> }>
+  getScores: (restaurant_id: any) => Promise<AxiosResponse<any>>,
+  // eslint-disable-next-line camelcase
+  getTags: (restaurant_id: any) => Promise<AxiosResponse<any>>,
+  // eslint-disable-next-line camelcase
+  getComments: (restaurant_id: any, tag_name: string, offset: number, limit: number) => Promise<AxiosResponse<any>>
+}
+
+export function comments (): IFetchRequest {
+  // eslint-disable-next-line camelcase
+  function getScores (restaurant_id: any):Promise<AxiosResponse<any>> {
+    // eslint-disable-next-line camelcase
+    return httpRequest(`/api/ugc/v2/restaurants/${restaurant_id}/ratings/scores`, 'get')
+  }
+
+  // eslint-disable-next-line camelcase
+  function getTags (restaurant_id: any):Promise<AxiosResponse<any>> {
+    // eslint-disable-next-line camelcase
+    return httpRequest(`/api/ugc/v2/restaurants/${restaurant_id}/ratings/tags`, 'get')
+  }
+
+  // eslint-disable-next-line camelcase
+  function getComments (restaurant_id: any, tag_name: string, offset: number, limit: number):Promise<AxiosResponse<any>> {
+    // eslint-disable-next-line camelcase
+    return httpRequest(`/api/ugc/v2/restaurants/${restaurant_id}/ratings`, 'get', { tag_name, offset, limit })
+  }
+  return { getScores, getTags, getComments }
 }
 
 // eslint-disable-next-line camelcase

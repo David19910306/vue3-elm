@@ -36,5 +36,14 @@ export interface IFetchResult{
   restaurantInfo: {
     [propName: string]:any // 为餐馆详情设置任意属性
   },
-  menus: never[] // 获取菜单信息
+  menus: never[], // 获取菜单信息
+  scores?: {
+    // eslint-disable-next-line camelcase
+    compare_rating: number,
+    // eslint-disable-next-line camelcase
+    overall_score: number,
+    [propName: string]: number
+  },
+  tags?: never[], // 评价标签
+  comments?: never[] // 详细评价
 }

@@ -56,7 +56,7 @@ export default defineComponent({
 
     // 组件挂载之后即可请求后台数据
     onMounted(async () => {
-      const location = await httpRequest('https://elm.cangdu.org/v1/cities', 'get', { type: 'guess' })
+      const location = await httpRequest('/api/v1/cities', 'get', { type: 'guess' })
       const hot = await httpRequest('/api/v1/cities', 'get', { type: 'hot' })
       const group = await httpRequest('/api/v1/cities', 'get', { type: 'group' })
       // console.log(location, hot, group)
