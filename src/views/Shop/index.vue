@@ -1,4 +1,5 @@
 <template>
+  <ConfigProvider :theme-vars="themeVars" style="height: 100%;">
   <section class="food-list-container">
     <nav @click="goBack"><span class="iconfont icon-fangxiang-zuo"></span></nav>
     <header class="shop-header-detail">
@@ -17,7 +18,7 @@
           </section>
           <span class="iconfont icon-fangxiang-you goForward"></span>
         </router-link>
-        <footer class="description-footer" v-if="restaurantInfo.activities.length > 0">
+        <footer class="description-footer" v-if="restaurantInfo.activities.length > 0" @click="show = !show">
           <p class="ellipsis">
             <Tag type="danger">减</Tag>
             <span>满30减5，满60减8（APP专享）</span>
@@ -28,7 +29,7 @@
       </section>
     </header>
     <section class="shop-detail-message">
-      <ConfigProvider :theme-vars="themeVars" style="height: 100%;">
+
         <Tabs v-model:active="currentTab" border type="line" style="height: 100%;">
           <Tab title="商品" style="height: 100%;">
             <!-- <section class="good-tag-lists"> -->
@@ -134,7 +135,7 @@
             </section>
           </Tab>
         </Tabs>
-      </ConfigProvider>
+
     </section>
   </section>
   <section class="cart-food-list" :style="{'display': `${cartFoodShow && store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) ? '': 'none'}`}">
@@ -165,11 +166,13 @@
       </ul>
     </section>
   </section>
+  <Overlay :show="show" @click="show = !show"></Overlay>
+  </ConfigProvider>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
-import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, Rate } from 'vant'
+import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, Rate, Overlay } from 'vant'
 import MenuDetailList from '@/components/menuDetailList/index.vue'
 import useFetchRequest, { comments } from '@/hook/shop/useFetch'
 import { addFoodsAtCart, minusFoodAtCart, clearCartById } from '@/hook/cart'
@@ -178,7 +181,7 @@ import { IFetchResult } from '@/interface'
 import { useStore } from 'vuex'
 
 export default defineComponent({
-  components: { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, MenuDetailList, Rate },
+  components: { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, MenuDetailList, Rate, Overlay },
   setup () {
     // 样式设置
     const themeVars = {
@@ -189,7 +192,9 @@ export default defineComponent({
       sidebarSelectedBorderHeight: '100%',
       sidebarSelectedTextColor: '#666',
       sidebarSelectedFontWeight: '700',
-      sidebarBackgroundColor: '#f5f5f5'
+      sidebarBackgroundColor: '#f5f5f5',
+      overlayZIndex: 13,
+      overlayBackgroundColor: '#000000E6'
     }
     const currentTab = ref(0)
     const currentBar = ref(0)
@@ -197,6 +202,7 @@ export default defineComponent({
     const cartFoodShow = ref(false) // 点击显示购物车列表
     const ratingStar = ref(4.7)
     const currentTagId = ref('') // 当前点击的标签的id
+    const show = ref(false)
 
     const state:IFetchResult = reactive({
       restaurantInfo: {
@@ -246,6 +252,24 @@ export default defineComponent({
       return store.state.cartFoods.filter((food:Record<string, any>) => food.restaurant_id === parseInt(restaurantId.value))
     })
 
+    // 计算菜品评价
+    // eslint-disable-next-line camelcase
+    const food_score = computed(() => {
+      return state.scores ? parseInt(state.scores.food_score.toFixed(1)) : ratingStar.value
+    })
+
+    //  服务态度
+    // eslint-disable-next-line camelcase
+    const service_score = computed(() => {
+      return state.scores ? parseInt(state.scores.service_score.toFixed(1)) : ratingStar.value
+    })
+
+    // 送达时间
+    // eslint-disable-next-line camelcase
+    const deliver_time = computed(() => {
+      return state.scores ? parseInt((state.scores.deliver_time / 10).toFixed(1)) : ratingStar.value
+    })
+
     // 购物车中增加按钮
     const increaseFood = (foodId: number) => {
       addFoodsAtCart(store, foodId) // 在购物车中直接添加商品
@@ -267,24 +291,6 @@ export default defineComponent({
       router.go(-1)
     }
 
-    // 计算菜品评价
-    // eslint-disable-next-line camelcase
-    const food_score = computed(() => {
-      return state.scores ? state.scores.food_score.toFixed(1) : ratingStar.value
-    })
-
-    //  服务态度
-    // eslint-disable-next-line camelcase
-    const service_score = computed(() => {
-      return state.scores ? state.scores.service_score.toFixed(1) : ratingStar.value
-    })
-
-    // 送达时间
-    // eslint-disable-next-line camelcase
-    const deliver_time = computed(() => {
-      return state.scores ? (state.scores.deliver_time / 100).toFixed(1) : ratingStar.value
-    })
-
     // 获取餐馆详情
     onMounted(async () => {
       const { restaurantInfo, menus } = await useFetchRequest({ shopId: id, restaurant_id: id })
@@ -301,7 +307,7 @@ export default defineComponent({
       state.comments = comment.data
       state.restaurantInfo = restaurantInfo.value
       state.menus = menus.value
-      console.log(state)
+      // console.log(state)
     })
     return {
       currentTab,
@@ -323,7 +329,8 @@ export default defineComponent({
       food_score,
       service_score,
       deliver_time,
-      currentTagId
+      currentTagId,
+      show
     }
   }
 })
