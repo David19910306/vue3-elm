@@ -166,7 +166,14 @@
       </ul>
     </section>
   </section>
-  <Overlay :show="show" @click="show = !show"></Overlay>
+  <Overlay :show="show" @click="show = !show" class-name="overlay-shop-message">
+    <h2 class="shop-title">开心吃饭饭</h2>
+    <section class="activities-header">
+      <header>
+        <Tag color="#000000" size="large" >优惠信息</Tag>
+      </header>
+    </section>
+  </Overlay>
   </ConfigProvider>
 </template>
 
@@ -336,7 +343,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .food-list-container{
   height: 100%;
   display: flex;
@@ -778,6 +785,22 @@ export default defineComponent({
           font-family: Helvetica Neue,Tahoma;
         }
       }
+    }
+  }
+}
+.overlay-shop-message{
+  color: #fff;
+  padding: .3rem;
+  box-sizing: border-box;
+  .shop-title{
+    text-align: center;
+    font-size: .1875rem;
+    color: #fff;
+    margin-bottom: .15rem;
+  }
+  .activities-header{
+    header{
+      text-align: center;
     }
   }
 }

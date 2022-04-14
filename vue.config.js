@@ -14,7 +14,7 @@ module.exports = {
     open: true,
     proxy: {
       '/api': {
-        target: 'http://120.79.121.94:8001/', // 'https://elm.cangdu.org/',
+        target: 'https://elm.cangdu.org/', // , 'http://120.79.121.94:8001/'
         ws: true,
         secure: false,
         changeOrigin: true,
