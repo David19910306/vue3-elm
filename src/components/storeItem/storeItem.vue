@@ -1,17 +1,23 @@
 <template>
   <div class="store-item" @click="jumpToStoreList">
-    <img :src="`https://fuss10.elemecdn.com/${item.image_url}`" alt="美食" />
-    <h6>{{item.title}}</h6>
+    <Skeleton title :loading="item.image_url === undefined" title-width="60" :style="{'--van-skeleton-row-height': '40px', 'margin-bottom': '5px'}">
+      <img :src="`https://fuss10.elemecdn.com/${item.image_url}`" alt="美食" />
+    </Skeleton>
+    <Skeleton title :loading="item.title === undefined" title-width="60">
+      <h6>{{item.title}}</h6>
+    </Skeleton>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { Skeleton } from 'vant'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 export default defineComponent({
   props: ['item'],
+  components: { Skeleton },
   setup (props) {
     const router = useRouter()
     const store = useStore()
@@ -46,6 +52,7 @@ export default defineComponent({
   h6{
     font-size: .13rem;
     color: #666;
+    text-align: center;
   }
 }
 </style>

@@ -1,10 +1,5 @@
 <template>
   <div class="main">
-    <Header>
-      <template v-slot:left><span><i class="iconfont icon-sousuo searchIcon"></i></span></template>
-      <template v-slot:center><span class="city-name">{{location.name}}</span></template>
-      <template v-slot:right><span>登录|注册</span></template>
-    </Header>
     <section class="content">
       <!-- 路由的跳转展示页面 -->
       <!-- <router-view></router-view> -->
@@ -38,32 +33,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { Tabbar, TabbarItem, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
-import httpRequest from '@/api'
-// import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'MainMsite',
+  name: 'Main',
   components: { Header, Tabbar, TabbarItem, Icon },
   setup () {
     const active = ref(0)
-    // const router = useRouter()
-    // console.log(router)
-    const data = reactive({
-      location: {}, // 当前的位置信息
-      geohash: '' // 当前经纬度信息
-    })
+    const geohash = ref('')
     const { getters } = useStore()
-    data.geohash = getters.getGeoHash
-    // 组件挂载请求后台
-    onMounted(async () => {
-      const response = await httpRequest(`/api/v2/pois/${getters.getGeoHash}`, 'get')
-      data.location = response.data
-    })
-    return { active, ...toRefs(data) }
+    geohash.value = getters.getGeoHash
+    return { active, geohash }
   }
 })
 </script>

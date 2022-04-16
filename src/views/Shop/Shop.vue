@@ -172,7 +172,7 @@
     </header>
     <ul class="activities-ul">
       <li v-for="activity in restaurantInfo.activities" :key="activity._id">
-        <Tag type="danger">{{activity.icon_name}}</Tag>
+        <Tag :color="`#${activity.icon_color}`">{{activity.icon_name}}</Tag>
         <span class="activity-message">{{activity.description}}</span>
       </li>
     </ul>

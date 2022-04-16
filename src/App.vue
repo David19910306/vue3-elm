@@ -1,7 +1,7 @@
 <template>
   <router-view v-slot="{Component}">
-    <!--include表示支队MainMsite组件进行缓存-->
-    <keep-alive include="MainMsite">
+    <!--include表示只对Main组件进行缓存-->
+    <keep-alive include="Main">
       <component :is="Component"></component>
     </keep-alive>
   </router-view>

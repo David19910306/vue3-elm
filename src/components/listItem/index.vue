@@ -1,7 +1,9 @@
 <template>
   <div class="list-item" @click="jumpToFoodList">
     <section class="left">
-      <img :src="`https://elm.cangdu.org/img/${list.image_path}`" />
+      <Skeleton :loading="list.image_path === undefined" title title-width="50" :style="{'--van-skeleton-row-height': '50px'}">
+        <img :src="`https://elm.cangdu.org/img/${list.image_path}`" />
+      </Skeleton>
     </section>
     <section class="center">
       <section class="top">
@@ -35,12 +37,12 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Tag, Rate } from 'vant'
+import { Tag, Rate, Skeleton } from 'vant'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ListItem',
-  components: { Tag, Rate },
+  components: { Tag, Rate, Skeleton },
   props: ['list'],
   setup (props) {
     const shiningCount = ref(props.list.rating)

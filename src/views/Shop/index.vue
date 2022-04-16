@@ -19,7 +19,7 @@ export default defineComponent({
 
     // 监听路由的变化
     watch(() => route.path, value => {
-      console.log(value)
+      // console.log(value)
       value === '/shop/shopDetail' ? currentComponentName.value = 'ShopDetail' : currentComponentName.value = 'Shop'
     })
 
