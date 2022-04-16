@@ -7,7 +7,12 @@
     </Header>
     <section class="content">
       <!-- 路由的跳转展示页面 -->
-      <router-view></router-view>
+      <!-- <router-view></router-view> -->
+      <router-view v-slot="{Component}">
+        <keep-alive>
+          <component :is="Component"></component>
+        </keep-alive>
+      </router-view>
     </section>
     <section class="tabbar">
       <Tabbar v-model="active" route>
@@ -38,12 +43,15 @@ import { Tabbar, TabbarItem, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
 import httpRequest from '@/api'
+// import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'Main',
   components: { Header, Tabbar, TabbarItem, Icon },
   setup () {
     const active = ref(0)
+    // const router = useRouter()
+    // console.log(router)
     const data = reactive({
       location: {}, // 当前的位置信息
       geohash: '' // 当前经纬度信息
