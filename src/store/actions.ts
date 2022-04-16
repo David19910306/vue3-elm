@@ -19,6 +19,9 @@ const actions:ActionTree<State, State> = {
   },
   clearCartById (context, payload: string):void{
     context.commit('clearCartById', payload)
+  },
+  recordRestaurant (context, payload: Record<string, any>) {
+    context.commit('recordRestaurant', payload)
   }
 }
 

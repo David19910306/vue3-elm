@@ -43,6 +43,10 @@ const mutations: MutationTree<State> = {
     // console.log(typeof payload)
     state.cartFoods = [...state.cartFoods.filter(food => food.restaurant_id !== parseInt(payload))]
     console.log(state.cartFoods)
+  },
+  // 记录当前的餐馆信息
+  recordRestaurant (state: State, payload: Record<string, any>) {
+    state.restaurantInfo = payload
   }
 }
 

@@ -8,26 +8,20 @@
       <section class="activities-container">
         <header>活动与属性</header>
         <ul class="actibities_ul">
-          <li>
-            <Tag color="#edc123">特</Tag>
-            <span class="activity-props">111（APP专享）</span>
-          </li>
-          <li>
-            <Tag color="#edc123">新</Tag>
-            <span class="activity-props">111（APP专享）</span>
-          </li>
-          <li>
-            <Tag color="#edc123">领</Tag>
-            <span class="activity-props">222</span>
-          </li>
-          <li>
-            <Tag color="#edc123">特</Tag>
-            <span class="activity-props">333（APP专享）</span>
-          </li>
-          <li>
-            <Tag color="#edc123">准</Tag>
-            <span class="activity-props">111（APP专享）</span>
-          </li>
+          <template v-if="restaurantInfo.activities.length > 0">
+            <li v-for="activity in restaurantInfo.activities" :key="activity._id">
+              <Tag :color="`#${activity.icon_color}`">{{activity.icon_name}}</Tag>
+              <span class="activity-props">{{activity.description}}</span>
+            </li>
+          </template>
+        </ul>
+        <ul class="actibities_ul">
+          <template v-if="restaurantInfo.supports.length > 0">
+            <li v-for="support in restaurantInfo.supports" :key="support._id">
+              <Tag :color="`#${support.icon_color}`">{{support.icon_name}}</Tag>
+              <span class="activity-props">{{support.description}}</span>
+            </li>
+          </template>
         </ul>
       </section>
       <section class="shop-status-container">
@@ -54,9 +48,9 @@
       </section>
       <section class="shop-status-info">
         <header>活动与属性</header>
-        <p>朝阳大饭店</p>
-        <p>地址：北京市朝阳区管庄泰福苑3区南1</p>
-        <p>营业时间：[8:30/20:30]</p>
+        <p>{{restaurantInfo.name}}</p>
+        <p>地址：{{restaurantInfo.address}}</p>
+        <p>营业时间：{{restaurantInfo.opening_hours.reduce((prev, curr) => prev + curr + ' ', '')}}</p>
         <p class="shop-certificate">
           <span>营业执照</span>
           <i class="iconfont icon-fangxiang-you"></i>
@@ -67,20 +61,24 @@
         </p>
       </section>
     </section>
-
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { Tag, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
+import { useStore } from 'vuex'
 
 export default defineComponent({
-  name: 'ShopDetail',
+  name: 'shopDetail',
   components: { Header, Tag, Icon },
   setup () {
-    console.log('shop-detail')
+    const restaurantInfo = ref(null)
+    const store = useStore()
+    restaurantInfo.value = store.state.restaurantInfo
+
+    return { restaurantInfo }
   }
 })
 </script>

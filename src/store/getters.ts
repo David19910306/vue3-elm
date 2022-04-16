@@ -7,6 +7,10 @@ const getters = {
   getCartFoods (state: State): {[propName:string]: any} {
     // console.log(state.cartFoods)
     return state.cartFoods
+  },
+  getRestaurantInfo (state: State): {[propName:string]: any} {
+    // console.log(state.cartFoods)
+    return state.restaurantInfo
   }
 }
 

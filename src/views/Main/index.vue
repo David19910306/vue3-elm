@@ -46,7 +46,7 @@ import httpRequest from '@/api'
 // import { useRouter } from 'vue-router'
 
 export default defineComponent({
-  name: 'Main',
+  name: 'MainMsite',
   components: { Header, Tabbar, TabbarItem, Icon },
   setup () {
     const active = ref(0)

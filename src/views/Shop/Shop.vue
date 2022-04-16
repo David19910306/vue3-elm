@@ -29,112 +29,111 @@
       </section>
     </header>
     <section class="shop-detail-message">
-
-        <Tabs v-model:active="currentTab" border type="line" style="height: 100%;">
-          <Tab title="商品" style="height: 100%;">
-            <!-- <section class="good-tag-lists"> -->
-              <section class="good-list-content">
-                <Sidebar v-model="currentBar">
-                  <sidebar-item v-for="menu in menus" :key="menu.id" :title="menu.name"
-                    :badge="badge[menu.id] && badge[menu.id].reduce((previous, current) => previous + current.foodCount, 0)"></sidebar-item>
-                </Sidebar>
-                <section class="good-lists">
-                  <ul>
-                    <li v-for="item in menus" :key="item.id">
-                      <header class="menu-detail-header">
-                        <section class="menu-title">
-                          <strong>{{item.name}}</strong>
-                          <span>{{item.description}}</span>
-                        </section>
-                        <Icon name="ellipsis" size="15" color="#969696"/>
-                      </header>
-                      <menu-detail-list v-for="list in item.foods" :key="list.item_id" :food="list"></menu-detail-list>
+      <Tabs v-model:active="currentTab" border type="line" style="height: 100%;">
+        <Tab title="商品" style="height: 100%;">
+          <!-- <section class="good-tag-lists"> -->
+            <section class="good-list-content">
+              <Sidebar v-model="currentBar">
+                <sidebar-item v-for="menu in menus" :key="menu.id" :title="menu.name"
+                  :badge="badge[menu.id] && badge[menu.id].reduce((previous, current) => previous + current.foodCount, 0)"></sidebar-item>
+              </Sidebar>
+              <section class="good-lists">
+                <ul>
+                  <li v-for="item in menus" :key="item.id">
+                    <header class="menu-detail-header">
+                      <section class="menu-title">
+                        <strong>{{item.name}}</strong>
+                        <span>{{item.description}}</span>
+                      </section>
+                      <Icon name="ellipsis" size="15" color="#969696"/>
+                    </header>
+                    <menu-detail-list v-for="list in item.foods" :key="list.item_id" :food="list"></menu-detail-list>
+                  </li>
+                </ul>
+              </section>
+            </section>
+          <!-- </section> -->
+          <footer class="cart-content">
+            <section class="cart-icon">
+              <section class="cart-container" @click="cartFoodShow = !cartFoodShow" :style="{'background-color':
+                `${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId))? '#3190e8': '#3d3d3d'}`}">
+                <span class="cart-list-length" :style="{'display': `${cartFoodsNumber === 0? 'none': ''}`}">{{cartFoodsNumber}}</span>
+                <i class="iconfont icon-gouwuche"></i>
+              </section>
+              <section class="show-money">
+                <span>￥ {{totalPrice}}</span>
+                <span>配送费￥5</span>
+              </section>
+            </section>
+            <section class="goto-pay" :style="`background-color:
+              ${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) && (totalPrice - 20 >= 0)? '#4cd964': '#535356'}`">
+              <span v-if="20 - totalPrice > 0">还差{{20 - totalPrice}}元起送</span>
+              <span v-else>去结算</span>
+            </section>
+          </footer>
+        </Tab>
+        <Tab title="评价">
+          <header class="overall-comment">
+            <section class="rating-header-left">
+              <p>{{scores.overall_score.toFixed(2)}}</p>
+              <p>综合评价</p>
+              <p>高于周边商店{{(scores.compare_rating * 100).toFixed(2)}}%</p>
+            </section>
+            <section class="rating-header-right">
+              <section class="rating-type">
+                <span>服务态度</span>
+                <Rate :size="10" v-model="service_score" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
+                <span class="rating-number">4.7</span>
+              </section>
+              <section class="rating-type">
+                <span>菜品评价</span>
+                <Rate :size="10" v-model="food_score" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
+                <span class="rating-number">4.8</span>
+              </section>
+              <section class="rating-type">
+                <span>送达时间</span>
+                <Rate :size="10" v-model="deliver_time" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
+                <span class="rating-number">4.5</span>
+              </section>
+            </section>
+          </header>
+          <section class="comment-lists">
+            <ul class="comment-tag">
+              <li v-for="tag in tags" :key="tag._id"
+                  :class="{activeTag: currentTagId === tag._id, unsatisfied: tag.name === '不满意'}"
+                  @click="currentTagId = tag._id"
+              >{{tag.name}}({{tag.count}})</li>
+            </ul>
+            <ul class="rating-list-ul">
+              <li class="rating-list-li" v-for="comment in comments" :key="comment._id">
+                <img class="user-avatar" alt="用户头像" :src="`${comment.avatar !== ''?
+                  `https://fuss10.elemecdn.com/${comment.avatar.substring(0, 1)}/${comment.avatar.substring(1, 3)}/${comment.avatar.substring(3)}.jpeg`:
+                  'https://elm.cangdu.org/img/default.jpg'}`" />
+                <section class="rating-list-detail">
+                  <header>
+                    <section class="user-star">
+                      <p class="user-name">{{comment.username}}</p>
+                      <section class="star-desc">
+                        <Rate :size="10" v-model="comment.rating_star" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
+                        <span class="time-spent-desc">按时送达</span>
+                      </section>
+                    </section>
+                    <time class="rated-at">{{comment.rated_at}}</time>
+                  </header>
+                  <ul class="food-img-ul" v-if="comment.item_ratings.length > 0 && comment.item_ratings.some(item => item.image_hash !== '')">
+                    <li v-for="image in comment.item_ratings.filter(item => item.image_hash !== '')" :key="image.food_id">
+                      <img :src="`https://fuss10.elemecdn.com/${image.image_hash.substring(0,1)}/${image.image_hash.substring(1,3)}/${image.image_hash.substring(3)}.jpeg`">
                     </li>
                   </ul>
+                  <ul class="food-name-ul" v-if="comment.item_ratings.length > 0">
+                    <li class="ellipsis" v-for="foodName in comment.item_ratings" :key="foodName.food_id">{{foodName.food_name}}</li>
+                  </ul>
                 </section>
-              </section>
-            <!-- </section> -->
-            <footer class="cart-content">
-              <section class="cart-icon">
-                <section class="cart-container" @click="cartFoodShow = !cartFoodShow" :style="{'background-color':
-                  `${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId))? '#3190e8': '#3d3d3d'}`}">
-                  <span class="cart-list-length" :style="{'display': `${cartFoodsNumber === 0? 'none': ''}`}">{{cartFoodsNumber}}</span>
-                  <i class="iconfont icon-gouwuche"></i>
-                </section>
-                <section class="show-money">
-                  <span>￥ {{totalPrice}}</span>
-                  <span>配送费￥5</span>
-                </section>
-              </section>
-              <section class="goto-pay" :style="`background-color:
-                ${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) && (totalPrice - 20 >= 0)? '#4cd964': '#535356'}`">
-                <span v-if="20 - totalPrice > 0">还差{{20 - totalPrice}}元起送</span>
-                <span v-else>去结算</span>
-              </section>
-            </footer>
-          </Tab>
-          <Tab title="评价">
-            <header class="overall-comment">
-              <section class="rating-header-left">
-                <p>{{scores.overall_score.toFixed(2)}}</p>
-                <p>综合评价</p>
-                <p>高于周边商店{{(scores.compare_rating * 100).toFixed(2)}}%</p>
-              </section>
-              <section class="rating-header-right">
-                <section class="rating-type">
-                  <span>服务态度</span>
-                  <Rate :size="10" v-model="service_score" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
-                  <span class="rating-number">4.7</span>
-                </section>
-                <section class="rating-type">
-                  <span>菜品评价</span>
-                  <Rate :size="10" v-model="food_score" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
-                  <span class="rating-number">4.8</span>
-                </section>
-                <section class="rating-type">
-                  <span>送达时间</span>
-                  <Rate :size="10" v-model="deliver_time" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
-                  <span class="rating-number">4.5</span>
-                </section>
-              </section>
-            </header>
-            <section class="comment-lists">
-              <ul class="comment-tag">
-                <li v-for="tag in tags" :key="tag._id"
-                    :class="{activeTag: currentTagId === tag._id, unsatisfied: tag.name === '不满意'}"
-                    @click="currentTagId = tag._id"
-                >{{tag.name}}({{tag.count}})</li>
-              </ul>
-              <ul class="rating-list-ul">
-                <li class="rating-list-li" v-for="comment in comments" :key="comment._id">
-                  <img class="user-avatar" alt="用户头像" :src="`${comment.avatar !== ''?
-                    `https://fuss10.elemecdn.com/${comment.avatar.substring(0, 1)}/${comment.avatar.substring(1, 3)}/${comment.avatar.substring(3)}.jpeg`:
-                    'https://elm.cangdu.org/img/default.jpg'}`" />
-                  <section class="rating-list-detail">
-                    <header>
-                      <section class="user-star">
-                        <p class="user-name">{{comment.username}}</p>
-                        <section class="star-desc">
-                          <Rate :size="10" v-model="comment.rating_star" color="#ffd21e" void-icon="star" void-color="#eee" readonly/>
-                          <span class="time-spent-desc">按时送达</span>
-                        </section>
-                      </section>
-                      <time class="rated-at">{{comment.rated_at}}</time>
-                    </header>
-                    <ul class="food-img-ul" v-if="comment.item_ratings.length > 0 && comment.item_ratings.some(item => item.image_hash !== '')">
-                      <li v-for="image in comment.item_ratings.filter(item => item.image_hash !== '')" :key="image.food_id">
-                        <img :src="`https://fuss10.elemecdn.com/${image.image_hash.substring(0,1)}/${image.image_hash.substring(1,3)}/${image.image_hash.substring(3)}.jpeg`">
-                      </li>
-                    </ul>
-                    <ul class="food-name-ul" v-if="comment.item_ratings.length > 0">
-                      <li class="ellipsis" v-for="foodName in comment.item_ratings" :key="foodName.food_id">{{foodName.food_name}}</li>
-                    </ul>
-                  </section>
-                </li>
-              </ul>
-            </section>
-          </Tab>
-        </Tabs>
+              </li>
+            </ul>
+          </section>
+        </Tab>
+      </Tabs>
 
     </section>
   </section>
@@ -317,6 +316,7 @@ export default defineComponent({
     // 获取餐馆详情
     onMounted(async () => {
       const { restaurantInfo, menus } = await useFetchRequest({ shopId: id, restaurant_id: id })
+      store.dispatch('recordRestaurant', restaurantInfo)
       // console.log(restaurantInfo, menus)
       //   const { restaurantInfo } = await useFetchRequest().fetchRestaurantInfo(id)
       //   const { menus } = await useFetchRequest().getMenus(restaurantInfo.value.id)
