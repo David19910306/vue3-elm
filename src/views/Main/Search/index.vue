@@ -6,75 +6,31 @@
     </Header>
     <section class="search-container">
       <section class="input-content">
-        <input placeholder="请输入商家或美食名称" type="text"/>
-        <button>提交</button>
+        <input placeholder="请输入商家或美食名称" type="text" @input="inputChangeHandler"/>
+        <button @click="submit">提交</button>
       </section>
-      <section class="search-history">
+      <section class="search-history" v-if="researchWord.length > 0 && keyWord === ''">
         <header>搜索历史</header>
         <ul class="history-ul">
-          <li><span>肯德基</span><Icon color="#33333" name="cross" /></li>
-          <li><span>肯德基</span><Icon color="#33333" name="cross" /></li>
-          <li><span>肯德基</span><Icon color="#33333" name="cross" /></li>
-          <li><span>肯德基</span><Icon color="#33333" name="cross" /></li>
-          <li><span>肯德基</span><Icon color="#33333" name="cross" /></li>
+          <li v-for="word in researchWord" :key="word"><span>{{word}}</span>
+            <Icon color="#33333" name="cross" @click="delCurrentWord(word)" />
+          </li>
         </ul>
-        <footer class="clear-history">清空搜索历史</footer>
+        <footer class="clear-history" @click="researchWord = []">清空搜索历史</footer>
       </section>
-      <section class="result-content">
+      <section class="result-content" v-if="result.length > 0 && keyWord !== ''">
         <header>商家</header>
         <ul class="list-ul">
-          <li class="list-li">
-            <section class="item-left"><img src="https://elm.cangdu.org/img/16c0a0e0dd949473.jpg" /></section>
+          <li class="list-li" v-for="restaurant in result" :key="restaurant.id" @click="router.push({ path: `/shop/${restaurant.id}` })">
+            <section class="item-left"><img :src="`https://elm.cangdu.org/img/${restaurant.image_path}`" /></section>
             <section class="item-right">
               <div class="item-right-text">
                 <p>
-                  <span class="shop-name">肯德基</span>
+                  <span class="shop-name">{{restaurant.name}}</span>
                   <Tag color="#FF6000" plain>支付</Tag>
                 </p>
-                <p>月售 704 单</p>
-                <p>20 元起送 / 距离1538.8公里</p>
-              </div>
-              <ul class="item-right-detail"></ul>
-            </section>
-          </li>
-          <li class="list-li">
-            <section class="item-left"><img src="https://elm.cangdu.org/img/16c0a0e0dd949473.jpg" /></section>
-            <section class="item-right">
-              <div class="item-right-text">
-                <p>
-                  <span class="shop-name">肯德基</span>
-                  <Tag color="#FF6000" plain>支付</Tag>
-                </p>
-                <p>月售 704 单</p>
-                <p>20 元起送 / 距离1538.8公里</p>
-              </div>
-              <ul class="item-right-detail"></ul>
-            </section>
-          </li>
-          <li class="list-li">
-            <section class="item-left"><img src="https://elm.cangdu.org/img/16c0a0e0dd949473.jpg" /></section>
-            <section class="item-right">
-              <div class="item-right-text">
-                <p>
-                  <span class="shop-name">肯德基</span>
-                  <Tag color="#FF6000" plain>支付</Tag>
-                </p>
-                <p>月售 704 单</p>
-                <p>20 元起送 / 距离1538.8公里</p>
-              </div>
-              <ul class="item-right-detail"></ul>
-            </section>
-          </li>
-          <li class="list-li">
-            <section class="item-left"><img src="https://elm.cangdu.org/img/16c0a0e0dd949473.jpg" /></section>
-            <section class="item-right">
-              <div class="item-right-text">
-                <p>
-                  <span class="shop-name">肯德基</span>
-                  <Tag color="#FF6000" plain>支付</Tag>
-                </p>
-                <p>月售 704 单</p>
-                <p>20 元起送 / 距离1538.8公里</p>
+                <p>{{`月售 ${restaurant.recent_order_num} 单`}}</p>
+                <p>{{`${restaurant.float_minimum_order_amount} 元起送 / 距离${restaurant.distance}公里`}}</p>
               </div>
               <ul class="item-right-detail"></ul>
             </section>
@@ -86,15 +42,45 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { Tag, Icon } from 'vant'
 import Header from '@/components/header/index.vue'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MainSearch',
   components: { Header, Tag, Icon },
   setup () {
-    console.log('@')
+    const store = useStore()
+    const router = useRouter() // 点击路由跳转
+    const keyWord = ref('')
+    const result = ref([])
+    const researchWord = ref([] as string[]) // 搜索历史
+    // 输入框输入事件
+    const inputChangeHandler = (event: InputEvent) => {
+      // 每次输入前，清空上一次的搜索结果列表
+      result.value = []
+      const element = event.target as HTMLInputElement
+      // console.log(element.value)
+      keyWord.value = element.value
+    }
+
+    // 搜索按钮点击事件
+    const submit = async () => {
+      researchWord.value.unshift(keyWord.value) // 收集搜索的关键字
+      const response = await httpRequest('/api/v4/restaurants', 'get', { geohash: store.getters.getGeoHash, keyword: keyWord.value })
+      // console.log(response)
+      result.value = response.data
+    }
+
+    // 搜索历史叉叉点击
+    const delCurrentWord = (delWord: string) => {
+      researchWord.value = researchWord.value.filter(word => word !== delWord)
+    }
+
+    return { submit, inputChangeHandler, result, keyWord, researchWord, delCurrentWord, router }
   }
 })
 </script>
