@@ -47,6 +47,10 @@ const mutations: MutationTree<State> = {
   // 记录当前的餐馆信息
   recordRestaurant (state: State, payload: Record<string, any>) {
     state.restaurantInfo = payload
+  },
+  // 记录登录用户的id
+  recordUserId (state: State, payload: number) {
+    state.userId = payload
   }
 }
 

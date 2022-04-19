@@ -5,11 +5,11 @@
       <template v-slot:center><span class="detail-center">我的</span></template>
     </Header>
     <section class="profile-container">
-      <router-link to="">
+      <router-link :to="`${userId !== undefined && userId !== 0? '/profile': '/login'}`">
         <div class="register-login">
-          <img class="login-image" src="https://elm.cangdu.org/img/default.jpg" />
+          <img class="login-image" :src="`${userId && userId !== 0? `https://elm.cangdu.org/img/${userInfo.avatar}`: 'https://img1.baidu.com/it/u=1303378338,2744756438&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=417'}`" />
             <div class="login">
-              <p>登录/注册</p>
+              <p>{{userId && userId !== 0? userInfo.username: `登录/注册`}}</p>
               <p>
                 <i class="iconfont icon-phone-iphone"></i>
                 <span>暂无绑定手机号</span>
@@ -20,15 +20,15 @@
       </router-link>
       <section class="info-data">
         <div class="login-activity">
-          <span class="money-number"><b>0.00</b>元</span>
+          <span class="money-number"><b>{{userId !== undefined? userInfo.balance :0.00}}</b>元</span>
           <span class="my-money">我的余额</span>
         </div>
         <div class="login-activity">
-          <span class="benefit-number"><b>0</b>个</span>
+          <span class="benefit-number"><b>{{userId && userId !== 0? userInfo.gift_amount :0}}</b>个</span>
           <span class="my-money">我的优惠</span>
         </div>
         <div class="login-activity">
-          <span class="score-number"><b>0</b>分</span>
+          <span class="score-number"><b>{{userId && userId !== 0? userInfo.point :0}}</b>分</span>
           <span class="my-money">我的积分</span>
         </div>
       </section>
@@ -90,14 +90,28 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, reactive, toRefs } from 'vue'
 import Header from '@/components/header/index.vue'
+import { useStore } from 'vuex'
+import { getUserInfo } from '@/hook/mine'
 
 export default defineComponent({
   name: 'MainMine',
   components: { Header },
   setup () {
-    console.log('@')
+    const store = useStore()
+    const state = reactive({
+      userId: store.getters.getUserId,
+      userInfo: {}
+    })
+
+    onMounted(async () => {
+      const userInfo = await getUserInfo(store.getters.getUserId)
+      state.userInfo = userInfo
+      console.log(userInfo)
+    })
+
+    return { ...toRefs(state) }
   }
 })
 </script>

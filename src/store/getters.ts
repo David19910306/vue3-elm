@@ -11,6 +11,9 @@ const getters = {
   getRestaurantInfo (state: State): {[propName:string]: any} {
     // console.log(state.cartFoods)
     return state.restaurantInfo
+  },
+  getUserId (state: State): number {
+    return state.userId
   }
 }
 

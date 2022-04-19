@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
+import Cookies from 'js-cookie'
 
 const service: AxiosInstance = axios.create({
   withCredentials: true, // 是否为跨域请求
@@ -8,6 +9,11 @@ const service: AxiosInstance = axios.create({
 // 请求的拦截
 service.interceptors.request.use(config => {
   // 一般设置请求的头或者是token
+  if (Cookies.get('cap')) {
+    config.headers = {
+      cookie: `cap=${Cookies.get('cap')}`
+    }
+  }
   return config
 }, error => {
   return error

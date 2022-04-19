@@ -22,6 +22,9 @@ const actions:ActionTree<State, State> = {
   },
   recordRestaurant (context, payload: Record<string, any>) {
     context.commit('recordRestaurant', payload)
+  },
+  recordUserId (context, payload: number) {
+    context.commit('recordUserId', payload)
   }
 }
 
