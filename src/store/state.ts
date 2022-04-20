@@ -9,7 +9,7 @@ const state:State = {
   geohash: '',
   cartFoods: [], // 购物车的数据存储
   restaurantInfo: {}, // 当前餐馆信息
-  userId: 0 // 用户id
+  userId: 0 // 用户id, 默认为0
 }
 
 export default state

@@ -4,7 +4,7 @@
       <template v-slot:left><span><i class="iconfont icon-fangxiang-zuo arrowLeft leftIcon"></i></span></template>
       <template v-slot:center><span class="detail-center">订单列表</span></template>
     </Header>
-    <section class="list-container">
+    <section class="list-container" v-if="store.getters.getUserId !== 0">
       <ul class="list-ul">
         <li v-for="order in orders" :key="order.id">
           <div class="shop-avatar">
@@ -16,7 +16,7 @@
                 <h4>{{order.restaurant_name}}<i class="iconfont icon-fangxiang-you"></i></h4>
                 <p class="order-time">{{order.formatted_created_at}}</p>
               </section>
-              <section class="delay" :style="{color: `#${order.status_bar.color}`}">{{order.status_bar.title}}</section>
+              <section class="delay" :style="{color: `#${Object.keys(order).length !== 0 && order.status_bar.color}`}">{{order.status_bar.title}}</section>
             </header>
             <section class="order-list-detail">
               <p>{{`${order.basket.group[0][0].name} 等${order.basket.group.reduce((prev, curr) => prev + curr.length,0)}件商品`}}</p>
@@ -54,7 +54,7 @@ export default defineComponent({
     onMounted(async () => {
       // 获取订单列表
       const result = await httpRequest(`/api/bos/v2/users/${store.getters.getUserId}/orders`, 'get', { limit: 10, offset: 0 })
-      console.log(result)
+      // console.log(store.getters.getUserId)
       orders.value = result.data
     })
 
@@ -64,7 +64,7 @@ export default defineComponent({
       // console.log(restaurantId)
     }
 
-    return { orders, another }
+    return { orders, another, store }
   }
 })
 </script>
@@ -74,6 +74,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: #f1f1f1;
   .detail-center{
     font-size: .2rem;
     font-weight: 700;

@@ -1,11 +1,14 @@
 <template>
-  <div class="mine">
+  <template v-if="route.path.includes('profile')">
+    <router-view></router-view>
+  </template>
+  <div class="mine" v-else>
     <Header>
       <template v-slot:left><span><i class="iconfont icon-fangxiang-zuo arrowLeft leftIcon"></i></span></template>
       <template v-slot:center><span class="detail-center">我的</span></template>
     </Header>
     <section class="profile-container">
-      <router-link :to="`${userId !== undefined && userId !== 0? '/profile': '/login'}`">
+      <router-link :to="`${userId !== 0? '/main/mine/profile': '/login'}`">
         <div class="register-login">
           <img class="login-image" :src="`${userId && userId !== 0? `https://elm.cangdu.org/img/${userInfo.avatar}`: 'https://img1.baidu.com/it/u=1303378338,2744756438&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=417'}`" />
             <div class="login">
@@ -90,28 +93,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, toRefs } from 'vue'
+import { defineComponent, onActivated, reactive, toRefs } from 'vue'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
 import { getUserInfo } from '@/hook/mine'
+import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'MainMine',
   components: { Header },
   setup () {
     const store = useStore()
+    const route = useRoute()
     const state = reactive({
-      userId: store.getters.getUserId,
+      userId: store.state.userId,
       userInfo: {}
     })
 
-    onMounted(async () => {
+    onActivated(async () => {
+      console.log(store.state.userId, 'userId')
+      if (store.getters.getUserId === 0) return state.userInfo
       const userInfo = await getUserInfo(store.getters.getUserId)
       state.userInfo = userInfo
       console.log(userInfo)
     })
 
-    return { ...toRefs(state) }
+    return { ...toRefs(state), route }
   }
 })
 </script>
@@ -130,6 +137,7 @@ export default defineComponent({
     font-size: .25rem;
   }
   .profile-container{
+    flex: 1;
     .register-login{
       height: .9rem;
       background-color: #3190e8;

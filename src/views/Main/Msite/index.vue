@@ -3,7 +3,12 @@
     <Header>
       <template v-slot:left><span><i class="iconfont icon-sousuo searchIcon"></i></span></template>
       <template v-slot:center><span class="city-name">{{location.name}}</span></template>
-      <template v-slot:right><span>登录|注册</span></template>
+      <template v-slot:right>
+        <span>
+          <i class="iconfont icon-31wode user-icon" v-if="store.getters.getUserId"></i>
+          <template v-else>登录|注册</template>
+        </span>
+      </template>
     </Header>
     <section class="msite-content">
       <section class="swipe-container">
@@ -59,7 +64,7 @@ export default defineComponent({
       }
     })
 
-    return { ...toRefs(state) }
+    return { ...toRefs(state), store }
   }
 })
 </script>
@@ -71,6 +76,10 @@ export default defineComponent({
   flex-direction: column;
   .searchIcon{
     font-size: .23rem;
+    font-weight: bolder;
+  }
+  .user-icon{
+    font-size: .25rem;
     font-weight: bolder;
   }
   .city-name{

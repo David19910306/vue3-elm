@@ -20,7 +20,8 @@ export default defineComponent({
       const { target } = event
       // console.log(event)
       target.className.includes('searchIcon') ? router.push({ path: '/main/search' }) : target.className.includes('leftIcon') ? router.go(-1)
-        : target.innerHTML === '登录|注册' ? router.push({ path: '/login' }) : console.log()
+        : target.innerHTML === '登录|注册' ? router.push({ path: '/login' })
+          : target.className.includes('user-icon') ? router.push({ path: '/main/mine' }) : router.push({ path: '' })
     }
 
     return { clickHandler }

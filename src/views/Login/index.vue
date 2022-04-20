@@ -15,11 +15,15 @@
         </Field>
         <Field
           v-model="form.password"
-          type="password"
+          :type="`${passwordVisible? 'text': 'password'}`"
           name="password"
           placeholder="密码"
           :rules="[{required: true, message: '请输入密码'}]"
         >
+          <template #right-icon>
+            <Icon name="closed-eye" size="0.23rem" @click="passwordVisible = !passwordVisible" v-if="!passwordVisible"/>
+            <Icon name="eye-o" size="0.23rem" @click="passwordVisible = !passwordVisible" v-else/>
+          </template>
         </Field>
         <Field
           v-model="form.captcha_code"
@@ -43,14 +47,14 @@
     <p class="login-tips">注册过的用户可凭账号密码登录</p>
     <Button color="#4cd964" style="width: 95%; margin: 0 auto; border-radius: 3px;" @click="clickLogin">登录</Button>
     <router-link to="">
-      <span class="reset-password">重置密码</span>
+      <span class="reset-password" @click="reset">重置密码</span>
     </router-link>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, reactive, toRefs } from 'vue'
-import { Form, Field, CellGroup, Button } from 'vant'
+import { Form, Field, CellGroup, Button, Icon, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
 import { refreshCode, login } from '@/hook/login'
 import { useRouter } from 'vue-router'
@@ -58,7 +62,7 @@ import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Login',
-  components: { Header, Form, Field, CellGroup, Button },
+  components: { Header, Form, Field, CellGroup, Button, Icon },
   setup () {
     const router = useRouter() // 路由跳转
     const store = useStore() // 存储用户ID
@@ -68,7 +72,8 @@ export default defineComponent({
         username: '',
         password: '',
         captcha_code: ''
-      }
+      },
+      passwordVisible: false // 密码的可见性
     })
 
     // 组件挂载开始请求验证码
@@ -85,10 +90,12 @@ export default defineComponent({
       // eslint-disable-next-line camelcase
       const { username, password, captcha_code } = state.form
       const result = await login(username, password, captcha_code)
-      console.log(result)
+      // console.log(result)
       if (result.user_id) {
         store.dispatch('recordUserId', result.user_id)
         router.push({ path: '/main/mine' })
+      } else {
+        Dialog.alert({ message: result.message })
       }
     }
 

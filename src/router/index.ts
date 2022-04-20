@@ -35,7 +35,14 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/main/mine',
         name: 'MainMine',
-        component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/index.vue')
+        component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/index.vue'),
+        children: [
+          {
+            path: '/main/mine/profile',
+            name: 'Profile',
+            component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/index.vue')
+          }
+        ]
       }
     ]
   },
