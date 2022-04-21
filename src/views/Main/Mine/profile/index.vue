@@ -1,5 +1,8 @@
 <template>
-  <div class="profile">
+  <template v-if="!route.path.endsWith('profile')">
+    <router-view></router-view>
+  </template>
+  <div class="profile" v-else>
     <Header>
       <template v-slot:left><span><i class="iconfont icon-fangxiang-zuo arrowLeft leftIcon"></i></span></template>
       <template v-slot:center><span class="detail-center">账户信息</span></template>
@@ -12,13 +15,16 @@
           <Icon name="arrow" size="0.2rem" color="#d0d0d0"/>
         </div>
       </section>
-      <router-link to="">
+      <router-link to="/main/mine/profile/setusername">
         <section class="username">
           <h2>用户名</h2>
-          <Icon name="arrow" size="0.2rem" color="#d0d0d0"/>
+          <span class="changePassword">
+            <p>{{store.state.userInfo.username}}</p>
+            <Icon name="arrow" size="0.2rem" color="#d0d0d0"/>
+          </span>
         </section>
       </router-link>
-      <router-link to="">
+      <router-link to="/main/mine/profile/address">
         <section class="username">
           <h2>收货地址</h2>
           <Icon name="arrow" size="0.2rem" color="#d0d0d0"/>
@@ -51,7 +57,7 @@ import { Icon, Button, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
 import httpRequest from '@/api'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'Profile',
@@ -59,6 +65,7 @@ export default defineComponent({
   setup () {
     const store = useStore()
     const router = useRouter()
+    const route = useRoute() // 检测当前的路由
     // 退出登录
     const logout = () => {
       Dialog.confirm({ message: '确认退出登录', title: '退出登录' }).then(async () => {
@@ -72,7 +79,7 @@ export default defineComponent({
       })
     }
 
-    return { logout }
+    return { logout, route, store }
   }
 })
 </script>

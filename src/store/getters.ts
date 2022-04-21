@@ -14,6 +14,9 @@ const getters = {
   },
   getUserId (state: State): number {
     return state.userId
+  },
+  getUserInfo (state: State): Record<string, any> {
+    return state.userInfo
   }
 }
 

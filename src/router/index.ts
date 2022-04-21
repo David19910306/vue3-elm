@@ -40,7 +40,31 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: '/main/mine/profile',
             name: 'Profile',
-            component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/index.vue')
+            component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/index.vue'),
+            children: [
+              {
+                path: '/main/mine/profile/setusername',
+                name: 'setUserName',
+                component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/setUserName.vue')
+              },
+              {
+                path: '/main/mine/profile/address',
+                name: 'Address',
+                component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/address.vue'),
+                children: [
+                  {
+                    path: '/main/mine/profile/address/add',
+                    name: 'Add',
+                    component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/add.vue')
+                  },
+                  {
+                    path: '/main/mine/profile/address/addDetail',
+                    name: 'AddDetail',
+                    component: () => import(/* webpackChunkName:"Main" */ '../views/Main/Mine/profile/addDetail.vue')
+                  }
+                ]
+              }
+            ]
           }
         ]
       }

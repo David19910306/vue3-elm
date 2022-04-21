@@ -51,6 +51,14 @@ const mutations: MutationTree<State> = {
   // 记录登录用户的id
   recordUserId (state: State, payload: number) {
     state.userId = payload
+  },
+  // 记录用户信息
+  recordUserInfo (state: State, payload: Record<string, any>) {
+    state.userInfo = payload
+  },
+  // 修改用户名
+  setUserName (state: State, userName: string) {
+    state.userInfo.username = userName
   }
 }
 

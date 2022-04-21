@@ -25,6 +25,13 @@ const actions:ActionTree<State, State> = {
   },
   recordUserId (context, payload: number) {
     context.commit('recordUserId', payload)
+  },
+  recordUserInfo (context, payload: Record<string, any>) {
+    context.commit('recordUserInfo', payload)
+  },
+  // 修改用户名
+  setUserName (context, payload: string) {
+    context.commit('setUserName', payload)
   }
 }
 

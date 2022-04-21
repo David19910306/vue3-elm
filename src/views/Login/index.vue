@@ -93,6 +93,7 @@ export default defineComponent({
       // console.log(result)
       if (result.user_id) {
         store.dispatch('recordUserId', result.user_id)
+        store.dispatch('recordUserInfo', result)
         router.push({ path: '/main/mine' })
       } else {
         Dialog.alert({ message: result.message })

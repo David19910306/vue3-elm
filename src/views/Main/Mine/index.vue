@@ -8,7 +8,7 @@
       <template v-slot:center><span class="detail-center">我的</span></template>
     </Header>
     <section class="profile-container">
-      <router-link :to="`${userInfo.avatar? '/main/mine/profile': '/login'}`">
+      <router-link :to="{path:`${userInfo.avatar? '/main/mine/profile': '/login'}`, }">
         <div class="register-login">
           <img class="login-image" :src="`${userInfo.avatar? `https://elm.cangdu.org/img/${userInfo.avatar}`: 'https://img1.baidu.com/it/u=1303378338,2744756438&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=417'}`" />
             <div class="login">
@@ -96,7 +96,7 @@
 import { defineComponent, onActivated, reactive, toRefs } from 'vue'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
-import { getUserInfo } from '@/hook/mine'
+// import { getUserInfo } from '@/hook/mine'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
 
 export default defineComponent({
@@ -112,8 +112,8 @@ export default defineComponent({
     onActivated(async () => {
       console.log(store.state.userId)
       if (store.getters.getUserId === 0) return
-      const userInfo = await getUserInfo(store.getters.getUserId)
-      state.userInfo = userInfo
+      // const userInfo = await getUserInfo(store.getters.getUserId)
+      state.userInfo = store.state.userInfo
     })
 
     // 组件内部路由导航守卫，退出登录之后清空用户信息
