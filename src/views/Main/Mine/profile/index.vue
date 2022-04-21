@@ -40,21 +40,39 @@
           </span>
         </section>
       </router-link>
-      <Button class="logout" color="#d8584a" block>退出登录</Button>
+      <Button class="logout" color="#d8584a" @click="logout" block>退出登录</Button>
     </section>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Icon, Button } from 'vant'
+import { Icon, Button, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'Profile',
   components: { Header, Icon, Button },
   setup () {
-    console.log('@')
+    const store = useStore()
+    const router = useRouter()
+    // 退出登录
+    const logout = () => {
+      Dialog.confirm({ message: '确认退出登录', title: '退出登录' }).then(async () => {
+        const result = await httpRequest('/api/v2/signout', 'get')
+        if (result.data.status === 1) {
+          store.dispatch('recordUserId', 0)
+          router.push({ name: 'MainMine', params: { logout: 'logout' } })
+        }
+      }).catch(() => {
+        // do nothing
+      })
+    }
+
+    return { logout }
   }
 })
 </script>

@@ -4,7 +4,7 @@
       <template v-slot:left><span><i class="iconfont icon-fangxiang-zuo arrowLeft leftIcon"></i></span></template>
       <template v-slot:center><span class="detail-center">订单列表</span></template>
     </Header>
-    <section class="list-container" v-if="store.getters.getUserId !== 0">
+    <section class="list-container" v-if="store.state.userId !== 0 && orders.length">
       <ul class="list-ul">
         <li v-for="order in orders" :key="order.id">
           <div class="shop-avatar">
@@ -16,12 +16,12 @@
                 <h4>{{order.restaurant_name}}<i class="iconfont icon-fangxiang-you"></i></h4>
                 <p class="order-time">{{order.formatted_created_at}}</p>
               </section>
-              <section class="delay" :style="{color: `#${Object.keys(order).length !== 0 && order.status_bar.color}`}">{{order.status_bar.title}}</section>
+              <section class="delay" :style="{color: `#${Object.keys(order).length !== 0 && order.status_bar.color}`}">{{Object.keys(order).length !== 0 && order.status_bar.title}}</section>
             </header>
             <section class="order-list-detail">
-              <p>{{`${order.basket.group[0][0].name} 等${order.basket.group.reduce((prev, curr) => prev + curr.length,0)}件商品`}}</p>
+              <p>{{`${order.basket && order.basket.group[0][0].name} 等${order.basket && order.basket.group.reduce((prev, curr) => prev + curr.length,0)}件商品`}}</p>
               <span class="total-price">
-                ￥{{order.basket.group.reduce((prev, curr) => prev + curr.reduce((acc, item) => acc + item.price * item.quantity,0),0) + order.basket.deliver_fee.price * order.basket.deliver_fee.quantity + order.basket.packing_fee.price * order.basket.packing_fee.quantity}}
+                ￥{{order.basket && order.basket.group.reduce((prev, curr) => prev + curr.reduce((acc, item) => acc + item.price * item.quantity,0),0) + order.basket.deliver_fee.price * order.basket.deliver_fee.quantity + order.basket.packing_fee.price * order.basket.packing_fee.quantity}}
               </span>
             </section>
             <footer class="order-again">
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, onActivated, ref } from 'vue'
 import { Button } from 'vant'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
@@ -51,7 +51,8 @@ export default defineComponent({
     const router = useRouter()
     const orders = ref([])
 
-    onMounted(async () => {
+    onActivated(async () => {
+      console.log('console.log')
       // 获取订单列表
       const result = await httpRequest(`/api/bos/v2/users/${store.getters.getUserId}/orders`, 'get', { limit: 10, offset: 0 })
       // console.log(store.getters.getUserId)
