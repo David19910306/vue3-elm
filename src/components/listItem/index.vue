@@ -28,7 +28,7 @@
         <Tag type="primary" plain :color="`#${list.delivery_mode? list.delivery_mode.color:'57a9ff'}`">准时达</Tag>
       </section>
       <section class="distanceTime">
-        <span class="distance">{{list.distance}}</span>
+        <span class="distance">{{list.distance}}</span> /
         <span class="time">{{list.order_lead_time}}</span>
       </section>
     </section>
@@ -97,11 +97,11 @@ export default defineComponent({
     }
     .distanceTime{
       flex: 1;
-      font-size: .12rem;
+      font-size: 0.12rem;
+      text-align: center;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: flex-end;
+      justify-content: center;
+      align-items: center;
       .distance{
         color: #8E8E8E;
       }

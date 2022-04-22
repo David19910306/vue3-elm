@@ -6,35 +6,59 @@
     </Header>
     <section class="add-address-container">
       <form class="add-address-form">
-        <input type="text" placeholder="请填写你的姓名" />
+        <input type="text" placeholder="请填写你的姓名" v-model.trim="form.name"/>
         <router-link to="/main/mine/profile/address/addDetail">
-          <input type="text" placeholder="小区/写字楼/学校等" />
+          <input type="text" placeholder="小区/写字楼/学校等" v-model.trim="form.address_detail" />
         </router-link>
-        <input type="text" placeholder="请填写详细送餐地址" />
-        <input type="text" placeholder="请填写你的联系方式" />
-        <input type="text" placeholder="备用电话（选填）" />
+        <input type="text" placeholder="请填写详细送餐地址" v-model.trim="form.address"/>
+        <input type="text" placeholder="请填写你的联系方式" v-model.trim="form.phone"/>
+        <input type="text" placeholder="备用电话（选填）" v-model.trim="form.phone_bk"/>
       </form>
     </section>
-    <Button block style="width: 95%; margin: 0 auto; margin-top: 0.15rem;" color="#4cd964">新增地址</Button>
+    <Button block style="width: 95%; margin: 0 auto; margin-top: 0.15rem;" color="#4cd964" @click="add">新增地址</Button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from 'vant'
 import Header from '@/components/header/index.vue'
-import { useRoute } from 'vue-router'
+import { IAddressState } from '@/interface'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
+import router from '@/router'
 
 export default defineComponent({
   name: 'Add',
   components: { Header, Button },
   setup () {
     const route = useRoute()
-    const state = reactive({
-      form: {} // 表单的值
+    const store = useStore()
+    const state: IAddressState = reactive({
+      // 表单的值
+      form: {
+        name: '',
+        address_detail: '',
+        geohash: '',
+        address: '',
+        phone: '',
+        phone_bk: ''
+      }
     })
 
-    return { ...toRefs(state), route }
+    state.form.address_detail = route.params.address as string
+    state.form.geohash = route.params.geohash as string
+
+    const add = async () => {
+      // console.log(state.form)
+      const { data } = await httpRequest(`/api/v1/users/${store.state.userId}/addresses`, 'post', undefined,
+        { ...state.form, poi_type: 0, sex: 1, tag: '公司', tag_type: 4 })
+      // console.log(result)
+      data.status === 1 && router.push({ name: 'Address', params: { refreshAddress: 'refresh' } })
+    }
+
+    return { ...toRefs(state), route, add }
   }
 })
 </script>

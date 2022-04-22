@@ -24,7 +24,7 @@ interface IParams{
   [propName: string]:any
 }
 
-export default function httpRequest (url: string, method: 'get' | 'post', params?:IParams, data?:IParams): AxiosPromise {
+export default function httpRequest (url: string, method: 'get' | 'post' | 'delete', params?:IParams, data?:IParams): AxiosPromise {
   return request({
     url,
     method,

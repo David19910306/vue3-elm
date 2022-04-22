@@ -47,3 +47,25 @@ export interface IFetchResult{
   tags?: never[], // 评价标签
   comments?: never[] // 详细评价
 }
+
+export interface IAddress{
+  name: string,
+  address: string,
+  geohash: string,
+  latitude: number,
+  longitude: number
+}
+
+interface INewAddress{
+  name: string,
+  address_detail: string,
+  geohash: string,
+  address: string,
+  phone: string,
+  phone_bk: string
+}
+
+export interface IAddressState{
+  form:INewAddress
+}
+

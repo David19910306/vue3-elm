@@ -31,13 +31,13 @@
         </section>
       </router-link>
       <p class="bind-account">账号绑定</p>
-      <section class="phone">
+      <section class="phone" @click="showDialog = !showDialog">
         <span class="iconfont icon-phone-iphone"></span>
         <label>手机</label>
         <Icon name="arrow" size="0.2rem" color="#d0d0d0"/>
       </section>
       <p class="bind-account">安全设置</p>
-      <router-link to="">
+      <router-link to="/forget">
         <section class="username" style="border-top: 1px solid #ddd;">
           <h2>登录密码</h2>
           <span class="changePassword">
@@ -49,11 +49,19 @@
       <Button class="logout" color="#d8584a" @click="logout" block>退出登录</Button>
     </section>
   </div>
+  <ConfigProvider :theme-vars="themeVars">
+    <van-dialog v-model:show="showDialog" confirm-button-color="#000">
+      <section class="dialog">
+        <div class="tip_icon"><span></span><span ></span></div>
+        <p>请在手机APP中设置</p>
+      </section>
+    </van-dialog>
+  </ConfigProvider>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { Icon, Button, Dialog } from 'vant'
+import { defineComponent, ref } from 'vue'
+import { Icon, Button, Dialog, ConfigProvider } from 'vant'
 import Header from '@/components/header/index.vue'
 import httpRequest from '@/api'
 import { useStore } from 'vuex'
@@ -61,11 +69,18 @@ import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'Profile',
-  components: { Header, Icon, Button },
+  components: { Header, Icon, Button, [Dialog.Component.name]: Dialog.Component, ConfigProvider },
   setup () {
+    // 样式自定义
+    const themeVars = {
+      buttonDefaultBackgroundColor: '#4cd964',
+      buttonDefaultFontSize: '0.192rem'
+    }
+
     const store = useStore()
     const router = useRouter()
     const route = useRoute() // 检测当前的路由
+    const showDialog = ref(false) // 是否显示对话框
     // 退出登录
     const logout = () => {
       Dialog.confirm({ message: '确认退出登录', title: '退出登录' }).then(async () => {
@@ -79,7 +94,7 @@ export default defineComponent({
       })
     }
 
-    return { logout, route, store }
+    return { logout, route, store, showDialog, themeVars }
   }
 })
 </script>
@@ -174,4 +189,42 @@ export default defineComponent({
     }
   }
 }
+.dialog{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0.2rem 0;
+  p{
+    font-size: .17rem;
+    color: #333;
+  }
+  .tip_icon{
+    width: .63rem;
+    height: .63rem;
+    border: 0.035rem solid #f8cb86;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: .15rem;
+    span:first-child{
+      width: 0.03rem;
+      height: 0.35rem;
+      background-color: #f8cb86;
+    }
+    span:last-child{
+      width: 0.046rem;
+      height: 0.046rem;
+      border: 1px;
+      border-radius: 50%;
+      margin-top: 0.046rem;
+      background-color: #f8cb86;
+    }
+  }
+}
+
 </style>
