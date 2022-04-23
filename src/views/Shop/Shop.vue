@@ -68,7 +68,7 @@
             <section class="goto-pay" :style="`background-color:
               ${store.state.cartFoods.some(food => food.restaurant_id === parseInt(restaurantId)) && (totalPrice - 20 >= 0)? '#4cd964': '#535356'}`">
               <span v-if="20 - totalPrice > 0">还差{{20 - totalPrice}}元起送</span>
-              <span v-else>去结算</span>
+              <span v-else @click="router.push({ path: '/confirmOrder', query: { geohash: store.state.geohash, shopId: restaurantId } })">去结算</span>
             </section>
           </footer>
         </Tab>
@@ -190,7 +190,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
-import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, Rate, Overlay } from 'vant'
+import { Tag, Tab, Tabs, ConfigProvider, Sidebar, SidebarItem, Icon, Rate, Overlay, Dialog } from 'vant'
 import MenuDetailList from '@/components/menuDetailList/index.vue'
 import useFetchRequest, { comments } from '@/hook/shop/useFetch'
 import { addFoodsAtCart, minusFoodAtCart, clearCartById } from '@/hook/cart'
@@ -332,6 +332,18 @@ export default defineComponent({
       state.menus = menus.value
       // console.log(state)
     })
+
+    // 订单界面
+    // const pay = () => {
+    //   // 先判断是否登录
+    //   if (store.state.userId === 0) {
+    //     Dialog.alert({ message: '请先登录用户' })
+    //     router.push({ path: '/login' })
+    //   } else {
+    //     router.push({ path: '/confirmOrder', query: { geohash: store.state.geohash, shopId: id } })
+    //   }
+    // }
+
     return {
       currentTab,
       themeVars,
@@ -353,7 +365,9 @@ export default defineComponent({
       service_score,
       deliver_time,
       currentTagId,
-      show
+      show,
+      router
+      // pay
     }
   }
 })

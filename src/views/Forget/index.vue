@@ -81,9 +81,12 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs, onMounted } from 'vue'
-import { Form, Field, CellGroup, ConfigProvider, Button, Icon } from 'vant'
+import { Form, Field, CellGroup, ConfigProvider, Button, Icon, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
 import { refreshCode } from '@/hook/login'
+import httpRequest from '@/api'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Forget',
@@ -94,6 +97,8 @@ export default defineComponent({
       fieldPlaceholderTextColor: '#666'
     }
 
+    const router = useRouter()
+    const store = useStore()
     const state = reactive({
       form: {},
       imageUrl: '',
@@ -112,8 +117,17 @@ export default defineComponent({
     }
 
     // 修改密码
-    const resetPassword = () => {
-      console.log(state.form)
+    const resetPassword = async () => {
+      // console.log(state.form)
+      const { data } = await httpRequest('/api/v2/changepassword', 'post', undefined, { ...state.form })
+      // console.log(data)
+      Dialog.alert({ message: data.success || data.message })
+      if (data.status === 1) { // 密码修改成功跳转到登录界面重新登录
+        // 抹除vuex中用户的相关信息
+        store.dispatch('recordUserId', 0) // userId重新置为0
+        store.dispatch('recordUserInfo', {}) // 用户信息重置为{}
+        router.push({ path: '/login' }) // 跳转到登录界面
+      }
     }
 
     return { ...toRefs(state), themeVars, changeCode, resetPassword }

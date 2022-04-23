@@ -96,6 +96,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/forget',
     name: 'Forget',
     component: () => import(/* webpackChunkName: "Login" */ '../views/Forget/index.vue')
+  },
+  {
+    path: '/confirmOrder',
+    name: 'ConfirmOrder',
+    component: () => import(/* webpackChunkName: "Order" */ '../views/Order/index.vue')
   }
 ]
 
