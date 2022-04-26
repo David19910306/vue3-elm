@@ -1,16 +1,19 @@
 <template>
-  <div class="confirmOrder">
+  <template v-if="route.fullPath.endsWith('chooseAddress')">
+    <router-view></router-view>
+  </template>
+  <div class="confirmOrder" v-else>
     <Header>
       <template v-slot:left><span><i class="iconfont icon-fangxiang-zuo arrowLeft leftIcon"></i></span></template>
       <template v-slot:center><span class="detail-center">确认订单</span></template>
       <template v-slot:right><span><i class="iconfont icon-31wode user-icon"></i></span></template>
     </Header>
     <section class="order-section">
-      <router-link to="">
+      <router-link to="/confirmOrder/chooseAddress">
         <div class="add-address-container">
           <div class="address-left">
             <Icon name="location-o" size="0.2rem" color="#3190e8" />
-            <p class="add-address" v-if="false">请添加一个收货地址</p>
+            <p class="add-address" v-if="true">请添加一个收货地址</p>
             <div class="address-detail-con" v-else>
               <header>
                 <span class="name">戴义</span>
@@ -28,7 +31,7 @@
       <section class="deliver-model container-style">
         <p class="deliver-label">送达时间</p>
         <section class="deliver-time">
-          <p>尽快送达 | 预计 09:10</p>
+          <p>尽快送达 | 预计 {{checkout.delivery_reach_time}}</p>
           <Tag type="primary">蜂鸟转送</Tag>
         </section>
       </section>
@@ -51,56 +54,28 @@
           <span>茶百道</span>
         </header>
         <ul class="order-ul">
-          <li class="food-item-style">
-            <p class="food-name ellipsis">鲁班dd1</p>
+          <li class="food-item-style" v-for="cart in carts" :key="cart.food_id">
+            <p class="food-name ellipsis">{{cart.name}}</p>
             <div class="num-price">
-              <span>x 2</span>
-              <span>¥20</span>
-            </div>
-          </li>
-          <li class="food-item-style">
-            <p class="food-name ellipsis">鲁班dd1</p>
-            <div class="num-price">
-              <span>x 2</span>
-              <span>¥20</span>
-            </div>
-          </li>
-          <li class="food-item-style">
-            <p class="food-name ellipsis">鲁班dd1</p>
-            <div class="num-price">
-              <span>x 2</span>
-              <span>¥20</span>
-            </div>
-          </li>
-          <li class="food-item-style">
-            <p class="food-name ellipsis">鲁班dd1</p>
-            <div class="num-price">
-              <span>x 2</span>
-              <span>¥20</span>
-            </div>
-          </li>
-          <li class="food-item-style">
-            <p class="food-name ellipsis">鲁班dd1</p>
-            <div class="num-price">
-              <span>x 2</span>
-              <span>¥20</span>
+              <span>{{`x ${cart.foodCount}`}}</span>
+              <span>{{`￥${cart.price}`}}</span>
             </div>
           </li>
         </ul>
         <ul class="order-extra">
           <li class="food-item-style">
             <p class="food-name ellipsis">餐盒</p>
-            <span>¥ 3</span>
+            <span>{{`￥ ${carts.reduce((prev, cart) => prev + cart.packing_fee, 0)}`}}</span>
           </li>
           <li class="food-item-style">
             <p class="food-name ellipsis">配送费</p>
-            <span>¥ 4</span>
+            <span>¥ 5</span>
           </li>
         </ul>
         <div class="food-item-style total-price">
-          <p class="food-name ellipsis">订单 ¥128</p>
+          <p class="food-name ellipsis">订单 {{`￥${totalPrice}`}}</p>
           <div class="num-price">
-            <span data-v-4e0d5034="">待支付 ¥128</span>
+            <span data-v-4e0d5034="">待支付 {{`￥${totalPrice}`}}</span>
           </div>
         </div>
       </section>
@@ -116,7 +91,7 @@
           <li>
             <span>发票抬头</span>
             <div class="more-type">
-              <span class="ellipsis">不需要开发票</span>
+              <span class="ellipsis">{{checkout.invoice && checkout.invoice.status_text}}</span>
               <Icon name="arrow" size="0.15rem" color="#999"/>
             </div>
           </li>
@@ -132,13 +107,9 @@
     <header class="actions-header">支付方式</header>
     <section class="action-body">
       <ul class="pay-way-ul">
-        <li disabled>
-          <span class="on">货到付款（商家不支持货到付款）</span>
-          <Icon name="checked" color="#eee" size="0.2rem"/>
-        </li>
-        <li>
-          <span>在线支付</span>
-          <Icon name="checked" color="#4cd964" size="0.2rem"/>
+        <li v-for="payment in checkout.payments" :key="payment.id">
+          <span :class="{on: !payment.is_online_payment}">{{payment.is_online_payment? payment.name: `${payment.name}${payment.description}`}}</span>
+          <Icon name="checked" :color="`${payment.is_online_payment? '#4cd964': '#eee'}`" size="0.2rem"/>
         </li>
       </ul>
     </section>
@@ -146,17 +117,56 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { Icon, Tag, ActionSheet } from 'vant'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from 'vue'
+import { Icon, Tag, ActionSheet, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'ConfirmOrder',
   components: { Header, Icon, Tag, ActionSheet },
   setup () {
+    const store = useStore() // 获取vuex
+    const route = useRoute()
     const show = ref(false)
+    const state = reactive({
+      checkout: {},
+      carts: []
+    })
 
-    return { show }
+    const { geohash, shopId } = route.query
+    console.log(route)
+    state.carts = store.state.cartFoods
+    const entities = store.state.cartFoods.map((food: Record<string, any>) =>
+      ({
+        id: food.food_id,
+        attrs: [],
+        extra: {},
+        name: food.name,
+        packing_fee: food.packing_fee,
+        price: food.price,
+        quantity: food.foodCount,
+        sku_id: food.sku_id,
+        specs: food.specs.length === 0 ? [''] : food.specs.map((spec:Record<string, any>) => spec.value),
+        stock: food.stock
+      }))
+
+    // console.log(entities)
+    onMounted(async () => {
+      // 加入购物车,
+      const result = await httpRequest('/api/v1/carts/checkout', 'post', undefined,
+        { restaurant_id: shopId, geohash, entities: [entities] })
+      const { data } = result
+      data.status ? Dialog.alert({ message: data.message }) : state.checkout = data
+    })
+
+    const totalPrice = computed(() => {
+      return state.carts.reduce((prev, curr: Record<string, any>) => prev + curr.price * curr.foodCount, 0) + state.carts.reduce((prev, cart: Record<string, any>) => prev + cart.packing_fee, 0) + 5
+    })
+
+    return { show, ...toRefs(state), totalPrice, route }
   }
 })
 </script>
@@ -355,7 +365,7 @@ export default defineComponent({
         line-height: .4rem;
         padding: 0 0.164rem;
         .food-name{
-          width: 2.26rem;
+          width: 2.15rem;
         }
         p{
           font-size: .1523rem;

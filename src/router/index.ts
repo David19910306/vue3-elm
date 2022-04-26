@@ -100,7 +100,14 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/confirmOrder',
     name: 'ConfirmOrder',
-    component: () => import(/* webpackChunkName: "Order" */ '../views/Order/index.vue')
+    component: () => import(/* webpackChunkName: "Order" */ '../views/Order/index.vue'),
+    children: [
+      {
+        path: 'chooseAddress',
+        name: 'chooseAddress',
+        component: () => import(/* webpackChunkName: "Order" */ '../views/Order/address/chooseAddress.vue')
+      }
+    ]
   }
 ]
 
