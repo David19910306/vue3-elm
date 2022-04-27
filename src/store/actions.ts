@@ -32,6 +32,10 @@ const actions:ActionTree<State, State> = {
   // 修改用户名
   setUserName (context, payload: string) {
     context.commit('setUserName', payload)
+  },
+  // 选中的地址
+  selectAddress (context, payload: Record<string, any>) {
+    context.commit('selectAddress', payload)
   }
 }
 

@@ -6,20 +6,22 @@
       <template v-slot:right><span><i class="iconfont icon-31wode user-icon"></i></span></template>
     </Header>
     <ul class="address-ul">
-      <li>
-        <Icon name="checked" color="#4CD964" size="0.25rem"/>
+      <li v-for="address in addresses" :key="address.id" @click="selectAddressHandler(address)">
+        <section class="icon-section">
+          <Icon name="checked" color="#4CD964" size="0.25rem" v-if="address.id === currentId"/>
+        </section>
         <section class="address-detail">
           <span class="name">
-            戴义<span class="phone">先生 17607162307</span>
+            {{address.name}}<span class="phone">{{`${address.sex === 1? '先生': '女士'} ${address.phone}`}}</span>
           </span>
           <span class="address-tag">
-            <Tag color="#ff8f1f">公司</Tag>
-            <span class="detail">一期</span>
+            <Tag color="#ff8f1f">{{address.tag}}</Tag>
+            <span class="detail">{{address.address_detail}}</span>
           </span>
         </section>
       </li>
     </ul>
-    <footer class="addBtn">
+    <footer class="addBtn" @click="router.push({path: '/confirmOrder/addAddress'})">
       <Icon name="add-o" color="##3190e8" size="0.2rem"/>
       <span>新增收货地址</span>
     </footer>
@@ -27,15 +29,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import { Icon, Tag } from 'vant'
 import Header from '@/components/header/index.vue'
+import httpRequest from '@/api'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'chooseAddress',
   components: { Header, Icon, Tag },
   setup () {
-    console.log('@')
+    const store = useStore()
+    const router = useRouter()
+
+    const addresses = ref([]) // 收货地址列表
+    const currentId = ref(0) // 当前地址的id
+
+    onMounted(async () => {
+      // 组件挂载后请求数据
+      const result = await httpRequest(`/api/v1/users/${store.getters.getUserId}/addresses`, 'get')
+      // console.log(result)
+      addresses.value = result.data || []
+    })
+
+    // 选择地址
+    const selectAddressHandler = (address: Record<string, any>) => {
+      currentId.value = address.id
+      store.dispatch('selectAddress', address)
+      router.push({ path: '/confirmOrder', query: { geohash: store.state.geohash, shopId: store.state.restaurantInfo.id } })
+    }
+
+    return { addresses, router, currentId, selectAddressHandler }
   }
 })
 </script>
@@ -77,12 +102,14 @@ export default defineComponent({
       border-bottom: .0057rem solid #f5f5f5;
       padding: .1rem .15rem;
       line-height: .24rem;
-      .address-detail{
+      .icon-section{
         flex: 1;
+      }
+      .address-detail{
+        flex: 10;
         display: flex;
         flex-direction: column;
         justify-content: space-evenly;
-        padding: 0 0.138rem;
         .name{
           font-size: .184rem;
           color: #333;

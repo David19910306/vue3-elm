@@ -106,6 +106,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'chooseAddress',
         name: 'chooseAddress',
         component: () => import(/* webpackChunkName: "Order" */ '../views/Order/address/chooseAddress.vue')
+      },
+      {
+        path: 'addAddress',
+        name: 'addAddress',
+        component: () => import(/* webpackChunkName: "Order" */ '../views/Order/address/addAddress.vue')
       }
     ]
   }

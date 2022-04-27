@@ -97,7 +97,7 @@ import { defineComponent, onActivated, reactive, toRefs } from 'vue'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
 // import { getUserInfo } from '@/hook/mine'
-import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'MainMine',
@@ -117,7 +117,7 @@ export default defineComponent({
     })
 
     // 组件内部路由导航守卫，退出登录之后清空用户信息
-    onBeforeRouteUpdate(to => {
+    onBeforeRouteLeave(to => {
       if (to.params.logout === 'logout') state.userInfo = {}
     })
 

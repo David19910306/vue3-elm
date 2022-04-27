@@ -35,9 +35,16 @@ import { IAddress } from '@/interface'
 export default defineComponent({
   name: 'AddDetail',
   components: { Header, Button },
+  beforeRouteEnter (to:Record<string, any>, from:Record<string, any>, next:(vm:any) => void) {
+    // ...
+    next((vm:any) => {
+      vm.toComponent = from.name
+    })
+  },
   setup () {
     const router = useRouter() // 路由跳转
     const inputName = ref('')
+    const toComponent = ref('') // 离开路由时跳转到目的地的组件名称
     const address:Ref<IAddress[]> = ref([]) // 存储地址
 
     // 搜索地址
@@ -49,12 +56,15 @@ export default defineComponent({
 
     // 选址地址点击跳转
     const selectAddress = (addressIndex: number) => {
+      console.log(toComponent.value)
       const chooseAddr = address.value.find((addr, index) => index === addressIndex && addr)
-      chooseAddr && router.push({ name: 'Add', params: { address: chooseAddr.name, geohash: chooseAddr.geohash } })
-      // inputName.value = ''
+      if (chooseAddr) {
+        toComponent.value === 'Add' ? router.push({ name: 'Add', params: { address: chooseAddr.name, geohash: chooseAddr.geohash } })
+          : router.push({ name: 'addAddress', params: { address: chooseAddr.name, geohash: chooseAddr.geohash } })
+      }
     }
 
-    return { inputName, query, address, selectAddress }
+    return { inputName, query, address, selectAddress, toComponent }
   }
 })
 </script>

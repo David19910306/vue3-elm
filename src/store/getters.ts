@@ -17,6 +17,9 @@ const getters = {
   },
   getUserInfo (state: State): Record<string, any> {
     return state.userInfo
+  },
+  getSelectAddress (state: State): Record<string, any> {
+    return state.selectAddress
   }
 }
 

@@ -59,6 +59,9 @@ const mutations: MutationTree<State> = {
   // 修改用户名
   setUserName (state: State, userName: string) {
     state.userInfo.username = userName
+  },
+  selectAddress (state: State, payload: Record<string, any>) {
+    state.selectAddress = payload
   }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <template v-if="route.fullPath.endsWith('chooseAddress')">
+  <template v-if="route.fullPath.endsWith('chooseAddress') || route.fullPath.endsWith('addAddress')">
     <router-view></router-view>
   </template>
   <div class="confirmOrder" v-else>
@@ -13,15 +13,15 @@
         <div class="add-address-container">
           <div class="address-left">
             <Icon name="location-o" size="0.2rem" color="#3190e8" />
-            <p class="add-address" v-if="true">请添加一个收货地址</p>
+            <p class="add-address" v-if="addresses.length === 0">请添加一个收货地址</p>
             <div class="address-detail-con" v-else>
               <header>
-                <span class="name">戴义</span>
-                <span class="contact">先生 121212121221</span>
+                <span class="name">{{store.state.selectAddress.name || addresses[0].name}}</span>
+                <span class="contact">{{`${store.state.selectAddress.sex === 1? '男': '女'} ${store.state.selectAddress.phone}` || `${addresses[0].sex === 1? '男': '女'} ${addresses[0].phone}`}}</span>
               </header>
               <div class="address-detail">
-                <Tag type="primary">学校</Tag>
-                <span class="detail">二期一栋</span>
+                <Tag type="primary">{{store.state.selectAddress.tag || addresses[0].tag}}</Tag>
+                <span class="detail">{{store.state.selectAddress.address_detail  || addresses[0].address_detail}}</span>
               </div>
             </div>
           </div>
@@ -50,11 +50,11 @@
       </section>
       <section class="order-detail container-style">
         <header class="order-header">
-          <img src="https://elm.cangdu.org/img/1804be63145105087.png">
-          <span>茶百道</span>
+          <img :src="`https://elm.cangdu.org/img/${image_path}`">
+          <span>{{restaurantName}}</span>
         </header>
         <ul class="order-ul">
-          <li class="food-item-style" v-for="cart in carts" :key="cart.food_id">
+          <li class="food-item-style" v-for="cart in carts.filter(c => c.restaurant_id === parseInt(shopId))" :key="cart.food_id">
             <p class="food-name ellipsis">{{cart.name}}</p>
             <div class="num-price">
               <span>{{`x ${cart.foodCount}`}}</span>
@@ -65,7 +65,7 @@
         <ul class="order-extra">
           <li class="food-item-style">
             <p class="food-name ellipsis">餐盒</p>
-            <span>{{`￥ ${carts.reduce((prev, cart) => prev + cart.packing_fee, 0)}`}}</span>
+            <span>{{`￥ ${carts.filter(c => c.restaurant_id === parseInt(shopId)).reduce((prev, cart) => prev + cart.packing_fee, 0)}`}}</span>
           </li>
           <li class="food-item-style">
             <p class="food-name ellipsis">配送费</p>
@@ -99,7 +99,7 @@
         </section>
     </section>
     <footer class="order-footer">
-      <p>待支付 ￥128</p>
+      <p>待支付 {{`￥${totalPrice}`}}</p>
       <p>确认下单</p>
     </footer>
   </div>
@@ -133,12 +133,18 @@ export default defineComponent({
     const show = ref(false)
     const state = reactive({
       checkout: {},
-      carts: []
+      carts: [],
+      restaurantName: '',
+      image_path: '',
+      addresses: []
     })
 
     const { geohash, shopId } = route.query
-    console.log(route)
+    // console.log(route)
+    state.restaurantName = store.state.restaurantInfo.name
+    state.image_path = store.state.restaurantInfo.image_path
     state.carts = store.state.cartFoods
+
     const entities = store.state.cartFoods.map((food: Record<string, any>) =>
       ({
         id: food.food_id,
@@ -158,15 +164,20 @@ export default defineComponent({
       // 加入购物车,
       const result = await httpRequest('/api/v1/carts/checkout', 'post', undefined,
         { restaurant_id: shopId, geohash, entities: [entities] })
+
+      // 获取地址
+      const addresses = await httpRequest(`/api/v1/users/${store.state.userId}/addresses`, 'get')
+      state.addresses = addresses.data || []
       const { data } = result
       data.status ? Dialog.alert({ message: data.message }) : state.checkout = data
     })
 
     const totalPrice = computed(() => {
-      return state.carts.reduce((prev, curr: Record<string, any>) => prev + curr.price * curr.foodCount, 0) + state.carts.reduce((prev, cart: Record<string, any>) => prev + cart.packing_fee, 0) + 5
+      return state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev, curr: Record<string, any>) => prev + curr.price * curr.foodCount, 0) +
+        state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev, cart: Record<string, any>) => prev + cart.packing_fee, 0) + 5
     })
 
-    return { show, ...toRefs(state), totalPrice, route }
+    return { show, ...toRefs(state), totalPrice, route, shopId, store }
   }
 })
 </script>

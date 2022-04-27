@@ -3,7 +3,8 @@ export interface State{
   cartFoods: {[propName:string]: any}[],
   restaurantInfo: Record<string, any>,
   userId: number,
-  userInfo: Record<string, any>
+  userInfo: Record<string, any>,
+  selectAddress: Record<string, any>
 }
 
 const state:State = {
@@ -11,7 +12,8 @@ const state:State = {
   cartFoods: [], // 购物车的数据存储
   restaurantInfo: {}, // 当前餐馆信息
   userId: 0, // 用户id, 默认为0
-  userInfo: {}
+  userInfo: {},
+  selectAddress: {} // 选中的地址
 }
 
 export default state
