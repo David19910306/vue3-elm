@@ -111,6 +111,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'addAddress',
         name: 'addAddress',
         component: () => import(/* webpackChunkName: "Order" */ '../views/Order/address/addAddress.vue')
+      },
+      {
+        path: 'remark/:cart_id',
+        name: 'Remark',
+        component: () => import(/* webpackChunkName: "Order" */ '../views/Order/remark/index.vue')
       }
     ]
   }

@@ -1,5 +1,5 @@
 <template>
-  <template v-if="route.fullPath.endsWith('chooseAddress') || route.fullPath.endsWith('addAddress')">
+  <template v-if="route.fullPath.endsWith('chooseAddress') || route.fullPath.endsWith('addAddress') || route.fullPath.includes('remark')">
     <router-view></router-view>
   </template>
   <div class="confirmOrder" v-else>
@@ -20,7 +20,9 @@
                 <span class="contact">{{`${store.state.selectAddress.sex === 1? '男': '女'} ${store.state.selectAddress.phone}` || `${addresses[0].sex === 1? '男': '女'} ${addresses[0].phone}`}}</span>
               </header>
               <div class="address-detail">
-                <Tag type="primary">{{store.state.selectAddress.tag || addresses[0].tag}}</Tag>
+                <Tag :color="`${store.state.selectAddress.tag === '学校'? '#3190e8': store.state.selectAddress.tag === '公司'?
+                  '#4cd964': '#ff5722'}`">
+                  {{store.state.selectAddress.tag || addresses[0].tag}}</Tag>
                 <span class="detail">{{store.state.selectAddress.address_detail  || addresses[0].address_detail}}</span>
               </div>
             </div>
@@ -81,13 +83,15 @@
       </section>
       <section class="pay-way-container container-style">
         <ul class="pay-way-options">
-          <li>
-            <span>订单备注</span>
-            <div class="more-type">
-              <span class="ellipsis">口味、偏好等</span>
-              <Icon name="arrow" size="0.15rem" color="#999"/>
-            </div>
-          </li>
+          <router-link :to="`/confirmOrder/remark/${checkout.id}`">
+            <li>
+              <span>订单备注</span>
+              <div class="more-type">
+                <span class="ellipsis">口味、偏好等</span>
+                <Icon name="arrow" size="0.15rem" color="#999"/>
+              </div>
+            </li>
+          </router-link>
           <li>
             <span>发票抬头</span>
             <div class="more-type">

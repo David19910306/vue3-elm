@@ -15,7 +15,8 @@
             {{address.name}}<span class="phone">{{`${address.sex === 1? '先生': '女士'} ${address.phone}`}}</span>
           </span>
           <span class="address-tag">
-            <Tag color="#ff8f1f">{{address.tag}}</Tag>
+            <Tag :color="`${address.tag === '学校'? '#3190e8': address.tag === '公司'?
+                  '#4cd964': '#ff5722'}`">{{address.tag}}</Tag>
             <span class="detail">{{address.address_detail}}</span>
           </span>
         </section>
