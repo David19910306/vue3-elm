@@ -7,14 +7,15 @@
     <section class="quick-remark">
       <header class="header-style">快速备注</header>
       <ul class="remark-arr-list-ul">
-        <li class="remark-arr-list-li" v-for="(remark, remarkIndex) in remarks" :key="remarkIndex">
+        <li class="remark-arr-list-li" v-for="remark in remarks" :key="remark">
           <span
-            v-for="(mark, markIndex) in remark" :key="markIndex"
+            v-for="(mark, markIndex) in remark" :key="mark"
             @click="selectMark(mark, remark)"
             :class="{
               'remark-item-li': true,
               'first': markIndex === 0,
-              'choosed': selectRemarks.indexOf(mark) > -1 && (remark.length > 1? currentMark === mark: true),
+              'choosed': selectRemarks.indexOf(remark) > -1 &&
+                (remark.length === 1? true: remark.length === 2? currentMark2 === mark: remark.length === 3? currentMark3 === mark: false),
               'last': markIndex === remark.length - 1}"
             >
               {{mark}}
@@ -33,6 +34,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref } from 'vue'
 import { Button } from 'vant'
+// import { UUID } from 'uuid-generator-ts'
 import Header from '@/components/header/index.vue'
 import { useRoute } from 'vue-router'
 import httpRequest from '@/api'
@@ -44,9 +46,10 @@ export default defineComponent({
     const route = useRoute()
     // console.log(route)
     const remarks = ref([]) // 备注信息
-    const currentMark = ref('')
-    // const selectRemarks: Ref<[][]> = ref([])
-    const selectRemarks: Ref<string[]> = ref([])
+    const currentMark2 = ref('')
+    const currentMark3 = ref('')
+    const choosedMark: Ref<string[]> = ref([])
+    const selectRemarks: Ref<string[][]> = ref([])
     /* eslint-disable camelcase */
     const { cart_id } = route.params
 
@@ -58,36 +61,48 @@ export default defineComponent({
     })
 
     const selectMark = (mark: string, remarks:string[]) => {
-      // selectRemarks.value = remark
-      if (selectRemarks.value.indexOf(mark) === -1) {
-        // selectRemarks.value.push(remarks)
-        if (remarks.length > 1) {
-          // console.log(remarks, mark)
-          currentMark.value = mark
-          console.log(selectRemarks.value)
-          selectRemarks.value = [...remarks.filter(remark => remark === mark), ...selectRemarks.value]
+      // 判断remarks的长度是否为1
+      if (remarks.length === 1) {
+        if (selectRemarks.value.indexOf(remarks) === -1) {
+          selectRemarks.value.push(remarks)
         } else {
-          selectRemarks.value.push(remarks[0])
+          const currentIndex: number = selectRemarks.value.indexOf(remarks)
+          selectRemarks.value.splice(currentIndex, 1)
+        }
+      } else if (remarks.length === 2) { // remarks的大于1
+        currentMark2.value = mark
+
+        if (selectRemarks.value.indexOf(remarks) === -1 && choosedMark.value.indexOf(mark) === -1) {
+          selectRemarks.value.push(remarks)
+          choosedMark.value.push(mark)
+        } else {
+          const currentIndex: number = selectRemarks.value.indexOf(remarks)
+          selectRemarks.value.splice(currentIndex, 1)
+          const currentMark: number = choosedMark.value.indexOf(mark)
+          // console.log(currentMark, 'currentMark')
+          choosedMark.value.splice(currentMark, 1)
+          // console.log(choosedMark.value, 'choosedMark')
         }
       } else {
-        if (remarks.length > 1) {
-          // console.log(remarks, mark)
-          const spliceIndex = selectRemarks.value.indexOf(currentMark.value)
-          selectRemarks.value.splice(spliceIndex, 1)
+        currentMark3.value = mark
+        if (selectRemarks.value.indexOf(remarks) === -1 && choosedMark.value.indexOf(mark) === -1) {
+          selectRemarks.value.push(remarks)
+          choosedMark.value.push(mark)
         } else {
-          const spliceIndex = selectRemarks.value.indexOf(remarks[0])
-          selectRemarks.value.splice(spliceIndex, 1)
+          const currentIndex: number = selectRemarks.value.indexOf(remarks)
+          const currentMark: number = choosedMark.value.indexOf(mark)
+          selectRemarks.value.splice(currentIndex, 1)
+          choosedMark.value.splice(currentMark, 1)
         }
-        // const spliceIndex = selectRemarks.value.indexOf(mark)
-        // selectRemarks.value.splice(spliceIndex, 1)
       }
     }
 
     const confirmClick = () => {
-      console.log(selectRemarks.value)
+      const finalMark = [...choosedMark.value, ...[...selectRemarks.value.filter(select => select.length === 1)].map(single => single[0])]
+      console.log(finalMark)
     }
 
-    return { remarks, selectMark, currentMark, selectRemarks, confirmClick }
+    return { remarks, selectMark, currentMark2, currentMark3, selectRemarks, confirmClick, choosedMark }
   }
 })
 </script>
