@@ -62,6 +62,9 @@ const mutations: MutationTree<State> = {
   },
   selectAddress (state: State, payload: Record<string, any>) {
     state.selectAddress = payload
+  },
+  recordMarks (state: State, payload:string[]) {
+    state.orderRemarks = payload
   }
 }
 

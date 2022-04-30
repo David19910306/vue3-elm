@@ -1,5 +1,5 @@
 <template>
-  <template v-if="route.fullPath.endsWith('chooseAddress') || route.fullPath.endsWith('addAddress') || route.fullPath.includes('remark')">
+  <template v-if="route.fullPath.endsWith('chooseAddress') || route.fullPath.endsWith('addAddress') || route.fullPath.includes('remark') || route.fullPath.endsWith('payment')">
     <router-view></router-view>
   </template>
   <div class="confirmOrder" v-else>
@@ -87,7 +87,9 @@
             <li>
               <span>订单备注</span>
               <div class="more-type">
-                <span class="ellipsis">口味、偏好等</span>
+                <span class="ellipsis">
+                  {{store.state.orderRemarks.length > 0? store.state.orderRemarks.reduce((prev, curr, index, array) => index === array.length - 1? prev + curr: prev + curr + ',', '') :'口味、偏好等'}}
+                </span>
                 <Icon name="arrow" size="0.15rem" color="#999"/>
               </div>
             </li>
@@ -104,7 +106,7 @@
     </section>
     <footer class="order-footer">
       <p>待支付 {{`￥${totalPrice}`}}</p>
-      <p>确认下单</p>
+      <p @click="confirmToPay">确认下单</p>
     </footer>
   </div>
   <ActionSheet v-model:show="show">
@@ -126,7 +128,8 @@ import { Icon, Tag, ActionSheet, Dialog } from 'vant'
 import Header from '@/components/header/index.vue'
 import httpRequest from '@/api'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { IOrderState } from '@/interface'
 
 export default defineComponent({
   name: 'ConfirmOrder',
@@ -134,8 +137,9 @@ export default defineComponent({
   setup () {
     const store = useStore() // 获取vuex
     const route = useRoute()
+    const router = useRouter()
     const show = ref(false)
-    const state = reactive({
+    const state: IOrderState = reactive({
       checkout: {},
       carts: [],
       restaurantName: '',
@@ -149,19 +153,21 @@ export default defineComponent({
     state.image_path = store.state.restaurantInfo.image_path
     state.carts = store.state.cartFoods
 
-    const entities = store.state.cartFoods.map((food: Record<string, any>) =>
-      ({
-        id: food.food_id,
-        attrs: [],
-        extra: {},
-        name: food.name,
-        packing_fee: food.packing_fee,
-        price: food.price,
-        quantity: food.foodCount,
-        sku_id: food.sku_id,
-        specs: food.specs.length === 0 ? [''] : food.specs.map((spec:Record<string, any>) => spec.value),
-        stock: food.stock
-      }))
+    const entities = store.state.cartFoods.filter((food: Record<string, any>) => food.restaurant_id === parseInt(shopId as string)).map(
+      (food: Record<string, any>) =>
+        ({
+          id: food.food_id,
+          attrs: [],
+          extra: {},
+          name: food.name,
+          packing_fee: food.packing_fee,
+          price: food.price,
+          quantity: food.foodCount,
+          sku_id: food.sku_id,
+          specs: food.specs.length === 0 ? [''] : food.specs.map((spec:Record<string, any>) => spec.value),
+          stock: food.stock
+        })
+    )
 
     // console.log(entities)
     onMounted(async () => {
@@ -177,11 +183,33 @@ export default defineComponent({
     })
 
     const totalPrice = computed(() => {
-      return state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev, curr: Record<string, any>) => prev + curr.price * curr.foodCount, 0) +
-        state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev, cart: Record<string, any>) => prev + cart.packing_fee, 0) + 5
+      return state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev: number, curr: Record<string, any>) => prev + curr.price * curr.foodCount, 0) +
+        state.carts.filter((c: Record<string, any>) => c.restaurant_id === parseInt(shopId as string)).reduce((prev: number, cart: Record<string, any>) => prev + cart.packing_fee, 0) + 5
     })
 
-    return { show, ...toRefs(state), totalPrice, route, shopId, store }
+    // 确认下单
+    const confirmToPay = async () => {
+      // 先判断是否登录
+      if (store.state.userId === 0) {
+        Dialog.alert({ message: '请先登录用户' })
+        router.push({ path: '/login' })
+      } else {
+        // 确认下单
+        const comfirmOrder = await httpRequest(`/api/v1/users/${store.state.userId}/carts/${state.checkout.id}/orders`,
+          'post', undefined,
+          {
+            address_id: store.state.selectAddress.id || state.addresses[0].id,
+            restaurant_id: shopId,
+            geohash,
+            description: '',
+            entities: [entities]
+          })
+        console.log(comfirmOrder)
+        comfirmOrder.data.status === 1 ? router.push({ path: '/confirmOrder/payment' }) : Dialog.alert({ message: comfirmOrder.data.message })
+      }
+    }
+
+    return { show, ...toRefs(state), totalPrice, route, shopId, store, confirmToPay }
   }
 })
 </script>
@@ -428,6 +456,12 @@ export default defineComponent({
             span{
               font-size: .14rem;
               color: #aaa;
+              max-width: 2.5rem;
+            }
+            .ellipsis{
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
             }
           }
         }

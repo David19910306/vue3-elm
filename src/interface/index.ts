@@ -58,10 +58,12 @@ export interface IAddress{
 
 interface INewAddress{
   name: string,
+  // eslint-disable-next-line camelcase
   address_detail: string,
   geohash: string,
   address: string,
   phone: string,
+  // eslint-disable-next-line camelcase
   phone_bk: string
 }
 
@@ -69,3 +71,11 @@ export interface IAddressState{
   form:INewAddress
 }
 
+export interface IOrderState{
+  checkout: Record<string, any>,
+  carts: [],
+  restaurantName: string,
+  // eslint-disable-next-line camelcase
+  image_path: string,
+  addresses: Record<string, any>[]
+}

@@ -26,7 +26,17 @@
             </section>
             <footer class="order-again">
               <Button plain size="mini" color="#3190e8" @click="another(order.restaurant_id)"
-                :style="{'--van-button-border-radius': '3px'}">再来一单</Button>
+                :style="{'--van-button-border-radius': '3px'}" v-if="!countDownFinish" :key="order.id">再来一单</Button>
+              <Button plain size="mini" color="#FFA500" :style="{'--van-button-border-radius': '3px'}" v-else :key="order.id">
+                <ConfigProvider :theme-vars="themeVars">
+                  <CountDown :time="countDown" @finish="countDownFinish = !countDownFinish">
+                    <template #default="timeData">
+                      <span>去支付(还剩{{ timeData.minutes }}</span>
+                      <span>分钟{{ timeData.seconds }}秒)</span>
+                    </template>
+                  </CountDown>
+                </ConfigProvider>
+              </Button>
             </footer>
           </div>
         </li>
@@ -37,7 +47,7 @@
 
 <script lang="ts">
 import { defineComponent, onActivated, ref } from 'vue'
-import { Button } from 'vant'
+import { Button, CountDown, ConfigProvider } from 'vant'
 import Header from '@/components/header/index.vue'
 import { useStore } from 'vuex'
 import httpRequest from '@/api'
@@ -45,14 +55,20 @@ import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MainList',
-  components: { Header, Button },
+  components: { Header, Button, CountDown, ConfigProvider },
   setup () {
+    const themeVars = {
+      countDownTextColor: '#FFA500'
+    }
+
     const store = useStore()
     const router = useRouter()
     const orders = ref([])
 
+    const countDown = ref(1 * 14 * 60 * 1000)
+    const countDownFinish = ref(false) // 对话框默认不打开
+
     onActivated(async () => {
-      console.log('console.log')
       // 获取订单列表
       const result = await httpRequest(`/api/bos/v2/users/${store.getters.getUserId}/orders`, 'get', { limit: 10, offset: 0 })
       // console.log(store.getters.getUserId)
@@ -65,7 +81,7 @@ export default defineComponent({
       // console.log(restaurantId)
     }
 
-    return { orders, another, store }
+    return { orders, another, store, countDown, countDownFinish, themeVars }
   }
 })
 </script>

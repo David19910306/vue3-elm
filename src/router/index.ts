@@ -116,6 +116,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'remark/:cart_id',
         name: 'Remark',
         component: () => import(/* webpackChunkName: "Order" */ '../views/Order/remark/index.vue')
+      },
+      {
+        path: 'payment',
+        name: 'Payment',
+        component: () => import(/* webpackChunkName: "Order" */ '../views/Order/payment/index.vue')
       }
     ]
   }

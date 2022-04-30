@@ -20,6 +20,9 @@ const getters = {
   },
   getSelectAddress (state: State): Record<string, any> {
     return state.selectAddress
+  },
+  getOrderMarks (state: State): string[] {
+    return state.orderRemarks
   }
 }
 

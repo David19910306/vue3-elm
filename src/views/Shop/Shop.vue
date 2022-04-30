@@ -333,17 +333,6 @@ export default defineComponent({
       // console.log(state)
     })
 
-    // 订单界面
-    // const pay = () => {
-    //   // 先判断是否登录
-    //   if (store.state.userId === 0) {
-    //     Dialog.alert({ message: '请先登录用户' })
-    //     router.push({ path: '/login' })
-    //   } else {
-    //     router.push({ path: '/confirmOrder', query: { geohash: store.state.geohash, shopId: id } })
-    //   }
-    // }
-
     return {
       currentTab,
       themeVars,

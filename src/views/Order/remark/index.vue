@@ -25,7 +25,7 @@
     </section>
     <section class="quick-remark">
       <header class="header-style">其他信息</header>
-      <textarea placeholder="请输入备注内容(可不填)" class="input-text"></textarea>
+      <textarea placeholder="请输入备注内容(可不填)" class="input-text" v-model="otherRemark"></textarea>
     </section>
     <Button block style="width: 90%; margin: 0 auto; border-radius: 5px;" color="#4cd964" @click="confirmClick">确定</Button>
   </div>
@@ -36,20 +36,24 @@ import { defineComponent, onMounted, Ref, ref } from 'vue'
 import { Button } from 'vant'
 // import { UUID } from 'uuid-generator-ts'
 import Header from '@/components/header/index.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import httpRequest from '@/api'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Remark',
   components: { Header, Button },
   setup () {
     const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
     // console.log(route)
     const remarks = ref([]) // 备注信息
     const currentMark2 = ref('')
     const currentMark3 = ref('')
     const choosedMark: Ref<string[]> = ref([])
     const selectRemarks: Ref<string[][]> = ref([])
+    const otherRemark = ref('') // 其他备注信息（可不填）
     /* eslint-disable camelcase */
     const { cart_id } = route.params
 
@@ -99,10 +103,13 @@ export default defineComponent({
 
     const confirmClick = () => {
       const finalMark = [...choosedMark.value, ...[...selectRemarks.value.filter(select => select.length === 1)].map(single => single[0])]
-      console.log(finalMark)
+      if (otherRemark.value !== '') finalMark.push(otherRemark.value)
+      // console.log(finalMark)
+      store.dispatch('recordOrderRemarks', finalMark)
+      router.go(-1) // 返回支付界面
     }
 
-    return { remarks, selectMark, currentMark2, currentMark3, selectRemarks, confirmClick, choosedMark }
+    return { remarks, selectMark, currentMark2, currentMark3, selectRemarks, confirmClick, choosedMark, otherRemark }
   }
 })
 </script>

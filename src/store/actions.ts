@@ -36,6 +36,10 @@ const actions:ActionTree<State, State> = {
   // 选中的地址
   selectAddress (context, payload: Record<string, any>) {
     context.commit('selectAddress', payload)
+  },
+  // 订单备注信息
+  recordOrderRemarks (context, payload: string[]) {
+    context.commit('recordMarks', payload)
   }
 }
 

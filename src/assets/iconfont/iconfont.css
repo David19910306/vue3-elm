@@ -1,7 +1,7 @@
 @font-face {
   font-family:"iconfont";
   /* Project id 3192724 */
-  src: url('//at.alicdn.com/t/font_3192724_ra6568z4d2o.woff2?t=1647257753774') format('woff2'), url('//at.alicdn.com/t/font_3192724_ra6568z4d2o.woff?t=1647257753774') format('woff'), url('//at.alicdn.com/t/font_3192724_ra6568z4d2o.ttf?t=1647257753774') format('truetype');
+  src: url('//at.alicdn.com/t/font_3192724_ubhi9k3qqgn.woff2?t=1651291793251') format('woff2'), url('//at.alicdn.com/t/font_3192724_ubhi9k3qqgn.woff?t=1651291793251') format('woff'), url('//at.alicdn.com/t/font_3192724_ubhi9k3qqgn.ttf?t=1651291793251') format('truetype');
 }
 .iconfont {
   font-family:"iconfont" !important;
@@ -9,6 +9,15 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+.icon-wechat-pay:before {
+  content:"\eb06";
+}
+.icon-zhifubao:before {
+  content:"\e60b";
+}
+.icon-weixinzhifu:before {
+  content:"\e60a";
 }
 .icon-xin:before {
   content:"\e945";
